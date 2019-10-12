@@ -13,20 +13,12 @@ getPos(down,'  <-').
 type1([One, Two, Three, Four]) :-
     getPos(One,O),getPos(Two,Tw),
     getPos(Three,Th), getPos(Four,F),
-   format('| ~s~t~11|| ~s~t~22|| ~s~t~33|| ~s~t~44||~n', 
+   format('   | ~s~t~13||  ~s~t~24|| ~s~t~35|| ~s~t~46||~n', 
                             [ O  , Tw  , Th, F]).
+
+colsId:- format('   a~t~12| b~t~23| c~t~34| d~t~45| e~n').
+    
      
-
-printRow_Rest([]).
-printRow_Rest([Cel| Rest]):-
-    getCel(Cel,Symbol),
-    format(' ________ ~s',[Symbol]),
-    printRow_Rest(Rest).
-
-printRow([Cel|Rest]):-
-    getCel(Cel,Symbol),
-    format('~s',[Symbol]),
-    printRow_Rest(Rest).
 
 
 getPiecesOnLine([],0,0).
@@ -44,38 +36,38 @@ getNrPieces([SubList | Rest],White,Black):-
     Black is Black1 + Black2.
 	
 
+printRow_Rest([]).
+printRow_Rest([Cel| Rest]):-
+    getCel(Cel,Symbol),
+    format('________ ~s ',[Symbol]),
+    printRow_Rest(Rest).
 
+printRow([Cel|Rest],Nr):-
+    getCel(Cel,Symbol),
+    format('~d  ~s',[Nr,Symbol]),
+    printRow_Rest(Rest).
 
-printBoard([Row|_], []):-
-     printRow(Row),nl.
+printBoard([Row|_], [],Nr):-
+     printRow(Row,Nr),nl.
 
     
-printBoard([Row | Rest], [Cel| R]):-
-    printRow(Row),nl,
+printBoard([Row | Rest], [Cel| R],Nr):-
+    printRow(Row,Nr),nl,
+    Nr1 is Nr + 1,
     type1(Cel),
-    printBoard(Rest,R).
+    printBoard(Rest,R,Nr1).
 
 
 showBoard(Pieces,Cels,PlayNr):-
    	PlayNr < 4,
-    format("Straight4 # Play Number ~d:",[PlayNr]),nl,
-    printBoard(Pieces,Cels),
+    format("Straight4 # Play Number ~d:",[PlayNr]),nl,nl,
+    colsId,nl,
+    printBoard(Pieces,Cels,1),
     getNrPieces(Pieces,White,Black),
     format("Player A: ~d pieces~nPlayer B: ~d pieces~n",[White,Black]).
 
 showBoard(Pieces,Cels,PlayNr):-
-    format("Straight4 # Play Number ~d:",[PlayNr]),nl,
-    printBoard(Pieces,Cels),
-    getNrPieces(Pieces,White,Black),
+    format("Straight4 # Play Number ~d:",[PlayNr]),nl,nl,
+    colsId,nl,
+    printBoard(Pieces,Cels,1),
     format("Player A: ~d pieces~nPlayer B: ~d pieces~n",[4,4]).
-
-
-
-
-
-    
-    
-    
-    
-    
-    
