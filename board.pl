@@ -1,29 +1,39 @@
-
-
 getCel(empty,' ').
 getCel(black,'O').
-getCel(white, 'B').
+getCel(white, '#').
 
 
 getPos(empty,' ').
-getPos(up,'   ->').
-getPos(down,'  <-').
+getPos(up,'/').
+getPos(down,'\\').
 
 
-type1([One, Two, Three, Four]) :-
-    getPos(One,O),getPos(Two,Tw),
-    getPos(Three,Th), getPos(Four,F),
-   format('   | ~s~t~13||  ~s~t~24|| ~s~t~35|| ~s~t~46||~n', 
-                            [ O  , Tw  , Th, F]).
+%%initial_state
+emptyBoard([ [empty,empty, empty, empty, empty], 
+	     [empty,empty, empty, empty, empty],
+	     [empty,empty, empty, empty, empty],
+	     [empty,empty, empty, empty, empty],
+	     [empty,empty, empty, empty, empty] ]).
+  
+cels([	[empty,up, down, empty],
+	[up,up, down, down],
+	[down,down, up, up],
+	[empty, down, up, empty]]).
 
-colsId:- format('   a~t~12| b~t~23| c~t~34| d~t~45| e~n').
+
+
+drawCels([TypeOne, TypeTwo, TypeThree, TypeFour]) :-
+    getPos(TypeOne,O),getPos(TypeTwo,Tw),
+    getPos(TypeThree,Th), getPos(TypeFour,F),
+    format("~3||~t~a~t~10+|~t~a~t~11+|~t~a~t~11+|~t~a~t~11+|~n", [O, Tw, Th, F]).
+
+
+colsId:- format("~3|~d~t~t~10+~d~t~t~11+~d~t~t~11+~d~t~t~11+~d~t~t~11+~n", [1,2,3,4,5]).
     
      
-
-
 getPiecesOnLine([],0,0).
 getPiecesOnLine([Row|Rest],White,Black):-
-	Row==empty -> getPiecesOnLine(Rest, White, Black);
+    Row==empty -> getPiecesOnLine(Rest, White, Black);
     Row == white -> getPiecesOnLine(Rest, White1, Black),White is White1+1;
     Row == black -> getPiecesOnLine(Rest, White, Black1),Black is Black1+1.
 
@@ -54,9 +64,8 @@ printBoard([Row|_], [],Nr):-
 printBoard([Row | Rest], [Cel| R],Nr):-
     printRow(Row,Nr),nl,
     Nr1 is Nr + 1,
-    type1(Cel),
+    drawCels(Cel),
     printBoard(Rest,R,Nr1).
-
 
 showBoard(Pieces,Cels,PlayNr):-
    	PlayNr < 4,
@@ -64,10 +73,15 @@ showBoard(Pieces,Cels,PlayNr):-
     colsId,nl,
     printBoard(Pieces,Cels,1),
     getNrPieces(Pieces,White,Black),
-    format("Player A: ~d pieces~nPlayer B: ~d pieces~n",[White,Black]).
+    format("Player A: ~d pieces~nPlayer B: ~d pieces~n~n",[White,Black]).
 
 showBoard(Pieces,Cels,PlayNr):-
     format("Straight4 # Play Number ~d:",[PlayNr]),nl,nl,
     colsId,nl,
     printBoard(Pieces,Cels,1),
-    format("Player A: ~d pieces~nPlayer B: ~d pieces~n",[4,4]).
+    format("Player A: ~d pieces~nPlayer B: ~d pieces~n~n",[4,4]),nl.
+
+
+
+call :-	emptyBoard(M),cels(N),
+	showBoard(M,N,4).
