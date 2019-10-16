@@ -21,16 +21,17 @@ cels([	[empty,up, down, empty],
 	[empty, down, up, empty]]).
 
 
-
+%% desenha as celulas do tabuleiro que podem ser de 3 tipos
 drawCels([TypeOne, TypeTwo, TypeThree, TypeFour]) :-
     getPos(TypeOne,O),getPos(TypeTwo,Tw),
     getPos(TypeThree,Th), getPos(TypeFour,F),
-    format("~3||~t~a~t~10+|~t~a~t~11+|~t~a~t~11+|~t~a~t~11+|~n", [O, Tw, Th, F]).
+    format("~3||~t~a~t~6+|~t~a~t~7+|~t~a~t~7+|~t~a~t~6+|~n", [O, Tw, Th, F]).
 
-
-colsId:- format("~3|~d~t~t~10+~d~t~t~11+~d~t~t~11+~d~t~t~11+~d~t~t~11+~n", [1,2,3,4,5]).
+%% desenha os identificadores das colunas encima do tabuleiro
+colsId:- format("~3|~d~t~t~6+~d~t~t~7+~d~t~t~7+~d~t~t~6+~d~n", [1,2,3,4,5]).
     
-     
+
+%% nr de peças de cada cor presentes numa linha     
 getPiecesOnLine([],0,0).
 getPiecesOnLine([Row|Rest],White,Black):-
     Row==empty -> getPiecesOnLine(Rest, White, Black);
@@ -38,6 +39,7 @@ getPiecesOnLine([Row|Rest],White,Black):-
     Row == black -> getPiecesOnLine(Rest, White, Black1),Black is Black1+1.
 
 
+%% peças de cada cor no tabuleiro
 getNrPieces([],0,0).
 getNrPieces([SubList | Rest],White,Black):-
     getPiecesOnLine(SubList, White1, Black1),
@@ -49,13 +51,14 @@ getNrPieces([SubList | Rest],White,Black):-
 printRow_Rest([]).
 printRow_Rest([Cel| Rest]):-
     getCel(Cel,Symbol),
-    format('________ ~s ',[Symbol]),
+    format('____ ~s ',[Symbol]),
     printRow_Rest(Rest).
 
 printRow([Cel|Rest],Nr):-
     getCel(Cel,Symbol),
     format('~d  ~s',[Nr,Symbol]),
     printRow_Rest(Rest).
+
 
 printBoard([Row|_], [],Nr):-
      printRow(Row,Nr),nl.
@@ -72,13 +75,13 @@ showBoard(Pieces,Cels,PlayNr):-
     format("Straight4 # Play Number ~d:",[PlayNr]),nl,nl,
     colsId,nl,
     printBoard(Pieces,Cels,1),
-    getNrPieces(Pieces,White,Black),
+    getNrPieces(Pieces,White,Black),nl,
     format("Player A: ~d pieces~nPlayer B: ~d pieces~n~n",[White,Black]).
 
 showBoard(Pieces,Cels,PlayNr):-
     format("Straight4 # Play Number ~d:",[PlayNr]),nl,nl,
     colsId,nl,
-    printBoard(Pieces,Cels,1),
+    printBoard(Pieces,Cels,1),nl,
     format("Player A: ~d pieces~nPlayer B: ~d pieces~n~n",[4,4]),nl.
 
 
