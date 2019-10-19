@@ -1,90 +1,139 @@
-getCel(empty,' ').
-getCel(black,'O').
-getCel(white, '#').
-
-
 getPos(empty,' ').
-getPos(up,'/').
-getPos(down,'\\').
+getPos(green,'G').
+getPos(white,'W').
 
+getCel(empty,' ').
+getCel(up,'/').
+getCel(down,'\\').
+
+firstPlayer(player(1,green)).
+secondPlayer(player(2,white)).
 
 %%initial_state
-emptyBoard([ [empty,empty, empty, empty, empty], 
-	     [empty,empty, empty, empty, empty],
-	     [empty,empty, empty, empty, empty],
-	     [empty,empty, empty, empty, empty],
-	     [empty,empty, empty, empty, empty] ]).
+emptyBoard([
+        [empty,empty, empty, empty, empty], 
+	    [empty,empty, empty, empty, empty],
+	    [empty,empty, empty, empty, empty],
+	    [empty,empty, empty, empty, empty],
+	    [empty,empty, empty, empty, empty]
+    ]).
   
-cels([	[empty,up, down, empty],
+cels([	
+    [empty,up, down, empty],
 	[up,up, down, down],
 	[down,down, up, up],
 	[empty, down, up, empty]]).
 
 
-%% desenha as celulas do tabuleiro que podem ser de 3 tipos
-drawCels([TypeOne, TypeTwo, TypeThree, TypeFour]) :-
-    getPos(TypeOne,O),getPos(TypeTwo,Tw),
-    getPos(TypeThree,Th), getPos(TypeFour,F),
-    format("~3||~t~a~t~6+|~t~a~t~7+|~t~a~t~7+|~t~a~t~6+|~n", [O, Tw, Th, F]).
+drawCelsRest([]).
+drawCelsRest([Cel| Rest]):-
+    getCel(Cel,Symbol),
+    format("  ~a  |",[Symbol]),
+    drawCelsRest(Rest).
 
-%% desenha os identificadores das colunas encima do tabuleiro
-colsId:- format("~3|~d~t~t~6+~d~t~t~7+~d~t~t~7+~d~t~t~6+~d~n", [1,2,3,4,5]).
-    
+drawCels([Cel|Rest]):-
+    write('     |'),
+    getCel(Cel,Symbol),
+    format("  ~a  |",[Symbol]),
+    drawCelsRest(Rest).
 
 %% nr de peças de cada cor presentes numa linha     
-getPiecesOnLine([],0,0).
-getPiecesOnLine([Row|Rest],White,Black):-
-    Row==empty -> getPiecesOnLine(Rest, White, Black);
-    Row == white -> getPiecesOnLine(Rest, White1, Black),White is White1+1;
-    Row == black -> getPiecesOnLine(Rest, White, Black1),Black is Black1+1.
-
+getNrPiecesLine([],green,0).
+getNrPiecesLine([Row|Rest],Piece,PieceNr):-
+    Row \== Piece -> getNrPiecesLine(Rest, Piece, PieceNr);
+    Row == Piece -> getNrPiecesLine(Rest, Piece, PieceNr1), PieceNr is PieceNr1+1;
 
 %% peças de cada cor no tabuleiro
-getNrPieces([],0,0).
-getNrPieces([SubList | Rest],White,Black):-
-    getPiecesOnLine(SubList, White1, Black1),
-    getNrPieces(Rest,White2, Black2),
-    White is White1 + White2,
-    Black is Black1 + Black2.
-	
+getNrPieces([],green,0).
+getNrPieces([SubList | Rest],Piece,PieceNr):-
+    getNrPieces(Rest,Piece,0),
+    getNrPiecesLine(SubList,Piece, Piece1),
+    PieceNr is Piece1 + Piece2.
 
 printRow_Rest([]).
 printRow_Rest([Cel| Rest]):-
-    getCel(Cel,Symbol),
-    format('____ ~s ',[Symbol]),
+    getPos(Cel,Symbol),
+    format('____ ~s',[Symbol]),
     printRow_Rest(Rest).
 
-printRow([Cel|Rest],Nr):-
-    getCel(Cel,Symbol),
-    format('~d  ~s',[Nr,Symbol]),
+printRow([Cel|Rest]):-
+    getPos(Cel,Symbol),
+    format('  ~s',[Symbol]),
     printRow_Rest(Rest).
 
-
-printBoard([Row|_], [],Nr):-
-     printRow(Row,Nr),nl.
-
+/*printBoard([Row|_], [],Nr):-
+    printRow(Row,Nr),nl.
     
 printBoard([Row | Rest], [Cel| R],Nr):-
     printRow(Row,Nr),nl,
     Nr1 is Nr + 1,
     drawCels(Cel),
-    printBoard(Rest,R,Nr1).
+    printBoard(Rest,R,Nr1).*/
 
-showBoard(Pieces,Cels,PlayNr):-
-   	PlayNr < 4,
-    format("Straight4 # Play Number ~d:",[PlayNr]),nl,nl,
-    colsId,nl,
-    printBoard(Pieces,Cels,1),
-    getNrPieces(Pieces,White,Black),nl,
-    format("Player A: ~d pieces~nPlayer B: ~d pieces~n~n",[White,Black]).
+printColumnNumbers(N) :-
+    printColumnNumbers2(N), nl.
 
-showBoard(Pieces,Cels,PlayNr):-
+printColumnNumbers2(0).
+
+printColumnNumbers2(N) :-
+    N1 is N - 1,
+    printColumnNumbers2(N1),
+    write('     '),write(N1).
+
+printRowNumber(LineNumber) :-
+    write(' '), write(LineNumber), write(' ').
+
+sizeList([], 0).
+
+sizeList([_ | Tail], Size) :-
+    sizeList(Tail, SizeOfTail),
+    Size is SizeOfTail + 1.
+
+printBoard([HeadOfTheBoard | TailOfTheBoard],Cells) :-
+    nl,
+    sizeList(HeadOfTheBoard, NumberOfColumns),
+    printColumnNumbers(NumberOfColumns),
+    nl,
+    printBoard2([HeadOfTheBoard | TailOfTheBoard], Cells, 0).
+
+
+printBoard2([],[],_).
+
+printBoard2([HeadOfTheBoard | TailOfTheBoard],[],LineNumber) :-
+    printRowNumber(LineNumber),
+    printRow(HeadOfTheBoard),nl.
+
+printBoard2([HeadOfTheBoard | TailOfTheBoard],[HeadOfTheCells| TailOfTheCells], LineNumber):-
+    printRowNumber(LineNumber),
+    printRow(HeadOfTheBoard),nl,
+    drawCels(HeadOfTheCells),nl,
+    NextLineNumber is LineNumber + 1,
+    printBoard2(TailOfTheBoard,TailOfTheCells, NextLineNumber).
+
+printNTurns(NTurns) :-
+    format("Straight4 # Play Number ~d:",[NTurns]).
+
+printPlayer(player(PlayerNr,Piece), Board) :-
+    getNrPieces(Board,Piece,PieceNr),
+    nl,
+    format("Player ~d: ~d pieces",[PlayerNr,4]).
+
+
+showBoard(Board,Cels,Player,NTurns):-
+   	NTurns < 4,nl,
+    printNTurns(NTurns),nl,
+    printBoard(Board,Cels),nl,
+    printPlayer(Player,Board).
+
+/*showBoard(Board,Cels,PlayNr):-
     format("Straight4 # Play Number ~d:",[PlayNr]),nl,nl,
     colsId,nl,
     printBoard(Pieces,Cels,1),nl,
-    format("Player A: ~d pieces~nPlayer B: ~d pieces~n~n",[4,4]),nl.
+    format("Player A: ~d pieces~nPlayer B: ~d pieces~n~n",[4,4]),nl.*/
 
-
-
-call :-	emptyBoard(M),cels(N),
-	showBoard(M,N,4).
+call :-
+    firstPlayer(P1),
+    emptyBoard(M),
+    cels(N),
+    showBoard(M,N,P1,1).
+    
