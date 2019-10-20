@@ -114,7 +114,7 @@ printBoard([HeadOfTheBoard | TailOfTheBoard],Cells) :-
     nl,
     printBoardRest([HeadOfTheBoard | TailOfTheBoard], Cells, 0).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 getNrPieces(Board,TypePieces, NumberPieces):-
 	getBoardNrElements(Board,NumberPieces, TypePieces).
 
@@ -123,8 +123,8 @@ currentPlayerStatus(player(PlayerNr,TypePieces),Board):-
         nl,
         format("Player ~d(~s): ~d/4 pieces in the board",[PlayerNr,TypePieces,NumberPieces]).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% for now ?-call. will print the board and the overall status
 call :-
     printGameStatus(4), nl,
     finalStateBoard(M),
