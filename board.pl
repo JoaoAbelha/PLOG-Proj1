@@ -126,11 +126,5 @@ currentPlayerStatus(player(PlayerNr,TypePieces),Board):-
 	
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-call :-
-    printGameStatus(4), nl,
-    finalStateBoard(M),
-    cels(N),
-    printBoard(M,N),
-    firstPlayer(P1),
-    currentPlayerStatus(P1,M).
+
 
