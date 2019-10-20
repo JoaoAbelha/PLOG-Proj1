@@ -1,6 +1,4 @@
-
 %%calculate the size of the list using accumulators
-
 getListSize(List, Size):-
 	listSize(List, 0, Size).
 
@@ -8,7 +6,6 @@ listSize([],Size,Size).
 listSize([_|Tail],Size, Result):-
 	NewSize is Size + 1,
 	listSize(Tail,NewSize,Result).
-
 
 %% calculate number of elements using accumulators
 getNrElements(List,Element,Nr):-
@@ -23,7 +20,6 @@ getNr_aux([_|Tail], Ele, Nr, Result):-
 	getNr_aux(Tail, Ele, Nr, Result).
 
 %%list of lists calculate the number of elements of this
-
 getBoardNrElements(Board, Number, Element):-
 	getBoardNr_aux(Board, Element, 0, Number).
 

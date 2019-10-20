@@ -15,41 +15,48 @@ secondPlayer(player(2,yellow)).
 
 
 emptyBoard([[empty,empty, empty, empty, empty],
- 	    [empty,empty, empty, empty, empty],
-	    [empty,empty, empty, empty, empty],
-	    [empty,empty, empty, empty, empty],
-	    [empty,empty, empty, empty, empty]]).
+        [empty,empty, empty, empty, empty],
+        [empty,empty, empty, empty, empty],
+        [empty,empty, empty, empty, empty],
+        [empty,empty, empty, empty, empty]
+]).
 
 
-e1stateBoard([[empty,green, empty, empty, empty],
- 	    [empty,empty, empty, empty, empty],
-	    [empty,empty, empty, empty, empty],
-	    [empty,empty, empty, green, empty],
-	    [empty,empty, empty, empty, yellow]]).
-
-e2stateBoard([[empty,green, yellow, empty, empty],
- 	    [empty,empty, empty, empty, empty],
-	    [empty,green, empty, green, yellow],
-	    [empty,empty, empty, yellow, green],
-	    [yellow,empty, empty, empty, empty]]).
-
-finalStateBoard([[green,empty, empty, yellow, empty],
- 	    	[empty,green, empty, yellow, empty],
-	    	[empty,empty, green, yellow, empty],
-	    	[empty,empty, empty, green, empty],
-	    	[empty,empty, empty, yellow, empty]]).
+e1stateBoard([[empty,empty, empty, empty, empty],
+        [green,empty, empty, yellow, empty],
+        [empty,empty, empty, empty, empty],
+        [empty,empty, empty, empty, empty],
+        [empty,empty, empty, empty, empty]
+]).
 
 
-cels([	[empty,up, down, empty],[up,up, down, down],[down,down, up, up],[empty, down, up, empty]]).
+e2stateBoard([[empty,empty, empty, empty, empty],
+        [green,green, green, yellow, empty],
+        [green,yellow, empty, empty, empty],
+        [yellow,empty, empty, yellow, empty],
+        [empty,empty, empty, empty, empty]
+]).
 
+finalStateBoard([[empty,empty, empty, empty, empty],
+            [green,green, green, yellow, empty],
+            [green,empty, empty, yellow, empty],
+            [empty,empty, empty, yellow, empty],
+            [empty,empty, empty, yellow, empty]
+]).
+
+
+
+cels([[empty,up, down, empty],
+    [up,up, down, down],
+    [down,down, up, up],
+    [empty, down, up, empty]
+]).
 
 printGameStatus(NrTurns):-
 	    format("~n       #-#-# Straight4 #-#-#~n~n PLAY NUMBER ~d:",[NrTurns]).
 
-
 printRowNumber(LineNumber) :-
     write(' '), write(LineNumber), write(' ').
-
 
 printRow_Rest([]).
 
@@ -63,7 +70,6 @@ printRow([Cel|Rest]):-
     format('  ~s',[Symbol]),
     printRow_Rest(Rest).
 
-
 drawCelsRest([]).
 
 drawCelsRest([Cel| Rest]):-
@@ -71,13 +77,11 @@ drawCelsRest([Cel| Rest]):-
     format(" ~a  |",[Symbol]),
     drawCelsRest(Rest).
 
-
 drawCels([Cel|Rest]):-
     write('     |'),
     getCel(Cel,Symbol),
     format(" ~a  |",[Symbol]),
     drawCelsRest(Rest).
-
 
 printColumnNumbers(N) :-
     write(' '),
@@ -89,8 +93,6 @@ printColumnNumbers_aux(N) :-
     N1 is N - 1,
     printColumnNumbers_aux(N1),
     write('    '),write(N1).
-
-
 
 printBoardRest([],[],_).
 
@@ -116,14 +118,10 @@ printBoard([HeadOfTheBoard | TailOfTheBoard],Cells) :-
 getNrPieces(Board,TypePieces, NumberPieces):-
 	getBoardNrElements(Board,NumberPieces, TypePieces).
 
-
-
 currentPlayerStatus(player(PlayerNr,TypePieces),Board):-
 	getNrPieces(Board,TypePieces, NumberPieces),
         nl,
         format("Player ~d(~s): ~d/4 pieces in the board",[PlayerNr,TypePieces,NumberPieces]).
-	
-	
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
