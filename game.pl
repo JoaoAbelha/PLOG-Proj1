@@ -3,20 +3,23 @@
 :- use_module(library(lists)).
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% * Game class  * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-initalizePvsP(Game):-
+initializePvsP(Game):-
 	emptyBoard(Board),
 	cels(Cels),
-	firstPlayer(P1),
-	Game = [Board, P1, Cels, 1].
+	firstPlayer(P1), %% should be choosed randomly
+	Game = [Board, P1, Cels, 1, pvp].
 
 getGameBoard([Board|_], Board).
 
 getGamePlayer([_,Player|_], Player).
 
-getGameTypeCels([_,_,Cels,_],Cels).
+getGameTypeCels([_,_,Cels|_],Cels).
 
-getGameTurn([_,_,_,Turn],Turn).
+getGameTurn([_,_,_,Turn|_],Turn).
+
+getGameMode([_,_,_,_,Turn], Turn).
 
 nextPlayer(In,Ou):-
     (In = player(1,_) -> secondPlayer(Ou)).
@@ -24,21 +27,24 @@ nextPlayer(In,Ou):-
 nextPlayer(In,Ou):-
     (In = player(2,_) -> firstPlayer(Ou)).
 
-nextTurn([Board,Player,Cels,Turn], [Board,NextPlayer,Cels, NextTurn]):-
+nextTurn([Board,Player,Cels,Turn,Mode], [Board,NextPlayer,Cels, NextTurn, Mode]):-
 	nextPlayer(Player,NextPlayer),
 	NextTurn is Turn + 1.
 
+game_mode(pvp).
+game_mode(pvb).
+game_mode(bvb).
+
 %%%%%%%%%%%%%% * Section to read user inputs * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-call:-
-	readInteger(X),write(X),nl,
-	readInteger(Y), write(Y),nl .
+
 
 pressEnter:-
 	get_char(_), !.
 
 get_input(Char):-
 	get_char(Char),
-	pressEnter.
+	get_char(_), !.
+get_input(_).
 
 
 readInput(Input):-
@@ -48,14 +54,43 @@ readInput(Input):-
 
 readRest(10,[]).
 readRest(13, []).
-readRest(Ch,[Ch|Rest]):-
+readResret(Ch,[Ch|Rest]):-
 	get_code(Ch1),
 	readRest(Ch1,Rest).
 
-%% qd da mal nao funciona...
-readInteger(Int):-
-	readInput(Int),
-	(integer(Int); write('Is not a integer'),nl, fail),!.
+
+%% por exemplo para input de 1... "1."
+read_inteiro(X,Str,Min,Max):-
+	repeat,
+	format("Coords of ~s: ",[Str]),
+	read(X),
+	integer(X),
+	X >=Min , X =< Max, !.
+
+read_coords(X,Y, Min, Max):-
+	read_inteiro(X,"x",Min, Max ),
+	read_inteiro(Y,"y",Min, Max),
+	write(X),write(Y).
+
+%%%%%%%%%%%%%%%%%%%%%* Validate board   * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% to make sure that the board is empty in the beggining
+check_emptyness([],_, _).
+check_emptyness([ Row | Tail], Color1, Color2):-
+	nth1(_,Row, Color1), nth1(_,Row, Color2),
+	check_emptyness(Tail, Color1, Color2).
+
+is_empty(Game):-
+	getGameBoard(Board, Game),
+	first_player(player(_,Color1)),
+	second_player(player(_, Color2)),
+	check_emptyness(Board, Color1, Color2).
+
+%% to check the size of the board
+check_size([H|T]):-
+	getListSize([H|T], Size),
+	getListSize(T, Size2),
+	Size == 5, Size2 == 5.
 
 	
 
@@ -108,7 +143,12 @@ getTypePiece(Slope, Answer):- (
 		).
 
 checkIfSamePoint(SrcRow, DestRow, SrcCol, DestCol):-
-	SrcRow = DestRow, SrcCol = DestCol.
+	SrcRow \= DestRow, SrcCol \= DestCol, !.
+
+checkIfSamePoint(_, _, _, _):-
+	write("Not a valid input: Src and Dest coords should be different"), nl,
+	pressEnter, nl,
+	fail.
 
 isAdjacent(Game,SrcRow, DestRow, SrcCol, DestCol):-
 	getGameBoard(Game, Board),
@@ -125,11 +165,110 @@ isAdjacent(Game,SrcRow, DestRow, SrcCol, DestCol):-
 	 getGameTypeCels(Game,Cels),
          MiniR is MinRow- 1, MiniC is MinCol-1,
 	 getPiece(Cels,MiniR,MiniC,PieceGot),
-	 PieceGot = Piece -> true, !
+	 PieceGot = Piece -> true, write("baduh!"), !
 	).
 
+isAdjacent(_,_,_,_,_):-
+	format("You mande a invalid move",[]), nl,
+	format("You can only move a piece to an adjacent vertex of the board!",[]), nl,
+	format("Please try again, having that in consideration",[]), nl,
+	pressEnter, nl, fail.
+	
+	
 
-%%%%%%%%%%%%%%%%%%%%%% * Section with menus * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+check_cel(Board,X,Y, player(_,Value)):-
+	X1 is X + 1,
+	Y1 is Y + 1,
+	nth1(Y1,Board, Row),
+	nth1(X1, Row, Value).
+
+check_cel_empty(Board,X,Y):-
+	X1 is X + 1,
+	Y1 is Y + 1,
+	nth1(Y1,Board, Row),
+	nth1(X1, Row, empty).
+
+get_pos(Board, X, Y, Element):-
+	X1 is X + 1,
+	Y1 is Y + 1,
+	nth1(Y1,Board, Row),
+	nth1(X1, Row, Element).
+
+
+%% faz swap do conteudo do tabuleiro
+move_piece(SrcRow, DestRow, SrcCol, DestCol, BoardIn, BoardOut):-
+	get_pos(SrcRow, SrcCol, Piece), %% retrieves the piece
+	set_matrix_element_pos(BoardIn, BoardOut, empty, SrcRow, SrcCol),
+	set_matrix_element_pos(BoardIn, BoardOut, Piece, DestRow, DestCol).
+	
+	
+
+%%%%%%%%%%%%%%%%%%%%%% * Section with the check final state *%%%%%%%%%%%%%%%%%%%%%%%
+
+call4:-finalStateBoard(Board),
+       win(Board, yellow).
+
+%%retorna verdade se List[Index] = Element | Index = indice da primeira ocorrencia
+getIndex(List,Element,Index):-
+	nth1(Index,List,Element),!.
+	
+
+%%checks_for_a_line
+checkLine([Row|R], Color):-
+	( getIndex(Row, Color, Index),
+	  Index2 is Index + 1,
+	  getIndex(Row,Color, Index2),
+	  Index3 is Index2 + 1,
+	  getIndex(Row, Color, Index3),
+	  Index4 is Index3 + 1,
+	  getIndex(Row, Color, Index4),!
+	;
+	  checkLine(R,Color)
+	).
+
+%%checks_for_a_column...
+checkCol([Row, Row2, Row3, Row4|Rest],Color):-
+	(getIndex(Row,Color,Index), getIndex(Row2, Color, Index), 
+	 getIndex(Row3, Color, Index), getIndex(Row4, Color, Index), !
+	;
+	 checkCol([Row2, Row3, Row4|Rest], Color)
+	).
+
+%%check for diagonals
+diagonal_up([Row1, Row2, Row3, Row4|Rest], Color):-
+       ( nth1(Index,Row1,Color),
+    	 Index2 is Index + 1,
+    	 nth1(Index2,Row2,Color),
+    	 Index3 is Index2 + 1,
+    	 nth1(Index3,Row3,Color),
+    	 Index4 is Index3 + 1,
+         nth1(Index4,Row4,Color), ! ;
+         diagonal_up([Row2, Row3, Row4|Rest], Color)
+       ).
+
+diagonal_down([Row1, Row2, Row3, Row4|Rest], Color):-
+       ( nth1(Index,Row1,Color),
+    	 Index2 is Index - 1,
+    	 nth1(Index2,Row2,Color),
+    	 Index3 is Index2 - 1,
+    	 nth1(Index3,Row3,Color),
+    	 Index4 is Index3 - 1,
+         nth1(Index4,Row4,Color), ! ;
+         diagonal_up([Row2, Row3, Row4|Rest], Color)
+       ).
+    	
+
+%%still check: only can win after the fourth play (just performance enhancement)
+win(Board,player(_,Color)):-
+	(  checkLine(Board,Color);
+	   checkCol(Board, Color);
+	   diagonal_up(Board, Color);
+	   diagonal_down(Board, Color)
+	).
+
+	
+
+%%%%%%%%%%%%%%%%%%%%%% * Print menus * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 printMenu:-
@@ -139,7 +278,7 @@ printMenu:-
 	write('       Choose an option:        |'), nl,
 	write('|                               |'), nl,
 	write('|   1. Play                     |'), nl,
-	write('|   2. Exit                     |'), nl,
+	write('|   0. Exit                     |'), nl,
 	write('|                               |'), nl,
 	write('|                               |'), nl,
 	write('================================='), nl.
@@ -157,50 +296,96 @@ printGameMode:-
 	write('================================='), nl.
 
 
-
-menu:-
+%%%%%%%%%%%%%%%%%%%% * Menu handling-- eventualmente mudar os read * %%%%%%%%%%%%%%%%%%%%
+main_menu:-
 	printMenu,
-	get_input(Char), 
-	( Char = '1' -> write('Play the game'),nl, chooseGameMode;
-	  Char = '2' -> write('Exiting... the game');
-	  nl,
-	  write('Please write a valid input'), nl, 
-	  pressEnter,nl,
-	  menu).
+	read(Option),
+	integer(Option),
+	choose_main_menu(Option).
+
+choose_main_menu(Option):-
+	%% Go to the second menu
+	Option == 1, write('Play the game'),nl, menu_game_mode;
+	%% Exit the game
+	Option == 0, write('Exiting the game... Goodbye'),nl, !, true.
+
+choose_main_menu(_):-  main_menu.
 
 
-chooseGameMode:-
+
+menu_game_mode :- 
 	printGameMode,
-	get_input(Char),
-	( Char = '1' -> write('Play the game'),nl, initalizePvsP(Game),gameLoop(Game);
-	  Char = '2' -> write('Back to the main menu...'),nl, menu;
-	  nl,
-	  write('Please write a valid input'), nl, 
-	  pressEnter,nl,
-	  menu).
-
-
+	read(Option),
+	integer(Option),
+	choose_game_mode_menu(Option).
 	
-gameLoop(Game):-
+	
+choose_game_mode_menu(Option) :-
+	%% player vs player
+	Option == 1, format("Player vs Player",[]),nl, initializePvsP(Game), game_loop(Game);
+	%% Go back to the main menu
+	Option == 2, nl, main_menu.
+
+choose_game_mode_menu(_):- menu_game_mode.
+%%%%%%%%%%%%%%%%%%%%%% * Human Move * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+human_play(Game, GameOut):-
 	getGameBoard(Game, Board),
 	getGamePlayer(Game, Player),
 	getGameTypeCels(Game, Cels),
 	getGameTurn(Game, Turn),
+	repeat,
 	printGameStatus(Turn),
 	printBoard(Board,Cels),	
 	currentPlayerStatus(Player,Board),
 	pressEnter,nl ,
-	nextTurn(Game,GameOut),
-	gameLoop(GameOut).
+	(
+	%% before all the pieces are in the board
+	Turn =< 8,
+	read_coords(X, Y, 0, 4),
+	format("read coords",[]),nl,
+	check_cel_empty(Board, X, Y),
+	format("check cel empty",[]),nl,
+	Player = player(_,Color),
+	format("~p",[Color]),nl,
+	set_matrix_element_pos(Board, BoardOut, Color, Y, X),
+	format("set matrix",[]),nl,
+	nextTurn([BoardOut, Player, Cels, Turn, pvp], GameOut), nl, format("next turn",[]), nl ,!
+	;
+	Turn > 8,
+	%% after all the pieces in the board
+	read_coords(X1,Y1, 0, 4), %%choose coords where a piece is
+	check_cel(Board, X1, Y1, Player),
+	format("checked cels",[]), nl,
+	read_coords(X2, Y2, 0, 4), %% where should this be moved
+	checkIfSamePoint(Y1, Y2, X1, X2),
+	format("checked if the same point",[]), nl,
+	isAdjacent(Game,Y1, Y2, X1, X2),
+	format("checked if adjacent",[]), nl,
+	move_piece(Y1, Y2, X1, X2, Board, BoardOut),
+	format("moved piece",[]), nl,
+	nextTurn([BoardOut,Player, Cels,Turn, pvp] ,GameOut), !
+       ).
+	
+	
+	
+%%%%%%%%%%%%%%%%%%%%%% Game Loop %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 game :-
-	menu.
+	main_menu.
 
+game_loop(Game):-
+	getGamePlayer(Game,Player),
+	getGameBoard(Game,Board),
+	\+ win(Board,Player),
+	(	
+	getGameMode(Game,Mode),
+	%% cut needed bc there will be other options
+	Mode == pvp, human_play(Game,GameOut), game_loop(GameOut), ! 
 	
-
-
-
-
-
-
+	).
+game_loop(_):-format("Someone Won",[]), nl, main_menu.
+		
+	
+	
