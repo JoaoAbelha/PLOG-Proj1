@@ -5,7 +5,7 @@ Implementing a board game
 For this week TODO:
 
 => Choose random player to start
-=> Refactor code and maybe change some functions
+=> Refactor code and maybe change some functions (OOP must be done!)
 => Second report about Player vs Player implementation
 => Second part and win handling
 => Test and test more
