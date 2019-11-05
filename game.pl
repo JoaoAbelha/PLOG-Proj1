@@ -6,7 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% * Game class  * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 initializePvsP(Game):-
-	emptyBoard(Board),
+	e2stateBoard(Board),
 	cels(Cels),
 	firstPlayer(P1), %% should be choosed randomly
 	Game = [Board, P1, Cels, 1, pvp].
@@ -128,9 +128,9 @@ min(X,Y,Ans):-(
     Ans is Y).
 
 checkOutOfBounds(Board, RowDest, ColDest):-
-	RowDest > 0, ColDest > 0,
+	RowDest >= 0, ColDest >= 0,
 	getListSize(Board, Size),
-	RowDest =< Size, ColDest =< Size.
+	RowDest < Size, ColDest < Size.
 
 getSlope(SrcRow, DestRow, SrcCol, DestCol, Slope):-
 	Delta_X is SrcRow-DestRow,
@@ -143,10 +143,10 @@ getTypePiece(Slope, Answer):- (
 		).
 
 checkIfSamePoint(SrcRow, DestRow, SrcCol, DestCol):-
-	SrcRow \= DestRow, SrcCol \= DestCol, !.
+	SrcRow =:= DestRow , SrcCol =:= DestCol, !.
 
 checkIfSamePoint(_, _, _, _):-
-	write("Not a valid input: Src and Dest coords should be different"), nl,
+	format("Not a valid input: Src and Dest coords should be different",[]), nl,
 	pressEnter, nl,
 	fail.
 
@@ -197,7 +197,8 @@ get_pos(Board, X, Y, Element):-
 
 %% faz swap do conteudo do tabuleiro
 move_piece(SrcRow, DestRow, SrcCol, DestCol, BoardIn, BoardOut):-
-	get_pos(SrcRow, SrcCol, Piece), %% retrieves the piece
+	get_pos(BoardIn,SrcRow, SrcCol, Piece), %% retrieves the piece,
+	format("~p",[Piece]), nl,
 	set_matrix_element_pos(BoardIn, BoardOut, empty, SrcRow, SrcCol),
 	set_matrix_element_pos(BoardIn, BoardOut, Piece, DestRow, DestCol).
 	
@@ -254,7 +255,7 @@ diagonal_down([Row1, Row2, Row3, Row4|Rest], Color):-
     	 nth1(Index3,Row3,Color),
     	 Index4 is Index3 - 1,
          nth1(Index4,Row4,Color), ! ;
-         diagonal_up([Row2, Row3, Row4|Rest], Color)
+         diagonal_down([Row2, Row3, Row4|Rest], Color)
        ).
     	
 
@@ -341,29 +342,29 @@ human_play(Game, GameOut):-
 	pressEnter,nl ,
 	(
 	%% before all the pieces are in the board
-	Turn =< 8,
-	read_coords(X, Y, 0, 4),
-	format("read coords",[]),nl,
-	check_cel_empty(Board, X, Y),
-	format("check cel empty",[]),nl,
-	Player = player(_,Color),
-	format("~p",[Color]),nl,
-	set_matrix_element_pos(Board, BoardOut, Color, Y, X),
-	format("set matrix",[]),nl,
-	nextTurn([BoardOut, Player, Cels, Turn, pvp], GameOut), nl, format("next turn",[]), nl ,!
-	;
-	Turn > 8,
+	%%Turn =< 8,
+	%%read_coords(X, Y, 0, 4),
+	%%format("read coords",[]),nl,
+	%%check_cel_empty(Board, X, Y),
+	%%format("check cel empty",[]),nl,
+	%%Player = player(_,Color),
+	%%format("~p",[Color]),nl,
+	%%set_matrix_element_pos(Board, BoardOut, Color, Y, X),
+	%%format("set matrix",[]),nl,
+	%%nextTurn([BoardOut, Player, Cels, Turn, pvp], GameOut), nl, format("next turn",[]), nl ,!
+	%%;
+	%%Turn > 8,
 	%% after all the pieces in the board
 	read_coords(X1,Y1, 0, 4), %%choose coords where a piece is
 	check_cel(Board, X1, Y1, Player),
-	format("checked cels",[]), nl,
+	format("~s",["1..."]), nl,
 	read_coords(X2, Y2, 0, 4), %% where should this be moved
-	checkIfSamePoint(Y1, Y2, X1, X2),
-	format("checked if the same point",[]), nl,
+	\+ checkIfSamePoint(Y1, Y2, X1, X2),
+	format("~s",["2..."]), nl,
 	isAdjacent(Game,Y1, Y2, X1, X2),
-	format("checked if adjacent",[]), nl,
-	move_piece(Y1, Y2, X1, X2, Board, BoardOut),
-	format("moved piece",[]), nl,
+	format("~s",["3..."]), nl,
+	move_piece(X1, X2, Y1, Y2, Board, BoardOut),
+	format("~s",["4..."]), nl,
 	nextTurn([BoardOut,Player, Cels,Turn, pvp] ,GameOut), !
        ).
 	
