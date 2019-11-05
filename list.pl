@@ -21,6 +21,12 @@ getNr_aux([_|Tail], Ele, Nr, Result):-
 getBoardNrElements(Board, Number, Element):-
 	getBoardNr_aux(Board, Element, 0, Number).
 
+getBoardNr_aux([], _, Nr, Nr). 
+getBoardNr_aux([List|Rest], Element, Number, Result):-
+	getNrElements(List, Element, GetNumber),
+	AtualCount is Number + GetNumber,
+	getBoardNr_aux(Rest, Element, AtualCount, Result).
+
 set_list_element([_|T],[Element|T],Element,0).
 set_list_element([Head|T1],[Head|List],Element,X):-
 	X > 0, !,

@@ -199,8 +199,8 @@ get_pos(Board, X, Y, Element):-
 move_piece(SrcRow, DestRow, SrcCol, DestCol, BoardIn, BoardOut):-
 	get_pos(BoardIn,SrcRow, SrcCol, Piece), %% retrieves the piece,
 	format("~p",[Piece]), nl,
-	set_matrix_element_pos(BoardIn, BoardOut, empty, SrcRow, SrcCol),
-	set_matrix_element_pos(BoardIn, BoardOut, Piece, DestRow, DestCol).
+	set_matrix_element_pos(BoardIn, Bout, empty, SrcRow, SrcCol),
+	set_matrix_element_pos(Bout, BoardOut, Piece, DestRow, DestCol).
 	
 	
 
