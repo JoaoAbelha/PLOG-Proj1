@@ -14,4 +14,11 @@ setRandomSeed:-
 	getrand(random(X, Y, Z, _)),
 	setrand(random(S, X, Y, Z)), !.
 :-setRandomSeed. 
+
+
+
+clearConsole:-
+	:-write('\33\[2J').
+
+
 	

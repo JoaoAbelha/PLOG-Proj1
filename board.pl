@@ -31,8 +31,8 @@ e1stateBoard([[empty,empty, empty, empty, empty],
 
 
 e2stateBoard([[empty,empty, empty, empty, empty],
-        [green,green, green, yellow, empty],
-        [green,yellow, empty, empty, empty],
+        [green,green, green, empty, green],
+        [empty,yellow, empty, empty, yellow],
         [yellow,empty, empty, yellow, empty],
         [empty,empty, empty, empty, empty]
 ]).

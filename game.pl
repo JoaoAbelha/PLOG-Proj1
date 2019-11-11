@@ -1,6 +1,8 @@
 :-include('board.pl').
 :-include('list.pl').
 :- use_module(library(lists)).
+:-use_module(library(random)).
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% * Game class  * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -10,6 +12,20 @@ initializePvsP(Game):-
 	cels(Cels),
 	firstPlayer(P1), %% should be choosed randomly
 	Game = [Board, P1, Cels, 1, pvp].
+
+
+initializePvsRandom(Game):-
+	emptyBoard(Board),
+	cels(Cels),
+	firstPlayer(P1), %% should be choosed randomly
+	Game = [Board, P1, Cels, 1, pvb].
+
+initializebvsb(Game):-
+	emptyBoard(Board),
+	cels(Cels),
+	firstPlayer(P1), %% should be choosed randomly
+	Game = [Board, P1, Cels, 1, bvb].
+
 
 getGameBoard([Board|_], Board).
 
@@ -279,22 +295,70 @@ printMenu:-
 	write('       Choose an option:        |'), nl,
 	write('|                               |'), nl,
 	write('|   1. Play                     |'), nl,
+	write('|   2. Credits                  |'), nl,
 	write('|   0. Exit                     |'), nl,
 	write('|                               |'), nl,
 	write('|                               |'), nl,
+	write('================================='), nl.
+
+printCredits:-
+	write('================================='), nl,
+	write('|          Straigth 4           |'), nl,
+	write('|===============================|'), nl,
+	write('|           Credits:            |'), nl,
+	write('|    This beautiful game        |'), nl,
+	write('|       was made by:            |'), nl,
+	write('|                               |'), nl,
+	write('|   * JOAO ABELHA               |'), nl,
+	write('|   * VITOR BARBOSA             |'), nl,
+	write('|                               |'), nl,
+	write('|   0 - Back                    |'), nl,
 	write('================================='), nl.
 
 printGameMode:-
 	write('================================='), nl,
 	write('|          Straigth 4           |'), nl,
 	write('|===============================|'), nl,
-	write('       Choose an option:        |'), nl,
+	write('|      Choose an option:        |'), nl,
 	write('|                               |'), nl,
 	write('|   1. Player Vs Player         |'), nl,
-	write('|   2. Back                     |'), nl,
+	write('|   2. Player Vs Bot            |'), nl,
+	write('|   3. Bot Vs Bot               |'), nl,
+	write('|   0. Back                     |'), nl,
 	write('|                               |'), nl,
 	write('|                               |'), nl,
 	write('================================='), nl.
+
+printPVsB:-
+	write('================================='), nl,
+	write('|          Straigth 4           |'), nl,
+	write('|===============================|'), nl,
+	write('|      Choose the bot you       |'), nl,
+	write('|     want to play against:     |'), nl,
+	write('|                               |'), nl,
+	write('|   1. Random                   |'), nl,
+	write('|   2. Smart                    |'), nl,
+	write('|   0. Back                     |'), nl,
+	write('|                               |'), nl,
+	write('|                               |'), nl,
+	write('================================='), nl.
+
+printBVsB:-
+	write('================================='), nl,
+	write('|          Straigth 4           |'), nl,
+	write('|===============================|'), nl,
+	write('|      Choose the bots you      |'), nl,
+	write('|     want to see play:         |'), nl,
+	write('|                               |'), nl,
+	write('|   1. Random vs Random         |'), nl,
+	write('|   2. Random vs Smart          |'), nl,
+	write('|   2. Smart vs Smart           |'), nl,
+	write('|   0. Back                     |'), nl,
+	write('|                               |'), nl,
+	write('|                               |'), nl,
+	write('================================='), nl.
+
+
 
 
 %%%%%%%%%%%%%%%%%%%% * Menu handling-- eventualmente mudar os read * %%%%%%%%%%%%%%%%%%%%
@@ -306,11 +370,20 @@ main_menu:-
 
 choose_main_menu(Option):-
 	%% Go to the second menu
-	Option == 1, write('Play the game'),nl, menu_game_mode;
+	Option == 1, write('Play the game'),nl, menu_game_mode, !;
 	%% Exit the game
-	Option == 0, write('Exiting the game... Goodbye'),nl, !, true.
-
+	Option == 0, write('Exiting the game... Goodbye'),nl, !, true ;
+	%% check the credits
+	Option == 2, nl, credits_menu.
+	
 choose_main_menu(_):-  main_menu.
+
+credits_menu:-
+	repeat,
+	printCredits,
+	read(Option),
+	integer(Option),
+	Option =:= 0, main_menu.
 
 
 
@@ -319,13 +392,37 @@ menu_game_mode :-
 	read(Option),
 	integer(Option),
 	choose_game_mode_menu(Option).
+
+menu_bot_mode :-
+	repeat,
+	printPVsB,
+	read(Option),
+	integer(Option),
+	(Option == 0, menu_game_mode, !; 
+	 Option == 1, initializePvsRandom(Game), game_loop(Game), !
+
+	).
+	
+menu_bot_vs_bot :-
+	repeat,
+	printBVsB,
+	read(Option),
+	integer(Option),
+	(Option == 0, menu_game_mode, !;
+	 Option == 1, initializebvsb(Game), game_loop(Game), ! ).
+	%% faltam os restantes bots
+	
 	
 	
 choose_game_mode_menu(Option) :-
 	%% player vs player
-	Option == 1, format("Player vs Player",[]),nl, initializePvsP(Game), game_loop(Game);
+	Option == 1, format("Player vs Player",[]),nl, initializePvsP(Game), game_loop(Game), !;
+	%% player vs bot
+	Option == 2, format("Player vs Bot", []), nl, menu_bot_mode, !;
+	%%bot vs bot
+	Option == 3, menu_bot_vs_bot,!;
 	%% Go back to the main menu
-	Option == 2, nl, main_menu.
+	Option == 0, nl, main_menu.
 
 choose_game_mode_menu(_):- menu_game_mode.
 %%%%%%%%%%%%%%%%%%%%%% * Human Move * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -342,17 +439,17 @@ human_play(Game, GameOut):-
 	pressEnter,nl ,
 	(
 	%% before all the pieces are in the board
-	%%Turn =< 8,
-	%%read_coords(X, Y, 0, 4),
-	%%format("read coords",[]),nl,
-	%%check_cel_empty(Board, X, Y),
-	%%format("check cel empty",[]),nl,
-	%%Player = player(_,Color),
-	%%format("~p",[Color]),nl,
-	%%set_matrix_element_pos(Board, BoardOut, Color, Y, X),
-	%%format("set matrix",[]),nl,
-	%%nextTurn([BoardOut, Player, Cels, Turn, pvp], GameOut), nl, format("next turn",[]), nl ,!
-	%%;
+	Turn =< 8,
+	read_coords(X, Y, 0, 4),
+	format("read coords",[]),nl,
+	check_cel_empty(Board, X, Y),
+	format("check cel empty",[]),nl,
+	Player = player(_,Color),
+	format("~p",[Color]),nl,
+	set_matrix_element_pos(Board, BoardOut, Color, Y, X),
+	format("set matrix",[]),nl,
+	nextTurn([BoardOut, Player, Cels, Turn, pvp], GameOut), nl, format("next turn",[]), nl ,!
+	;
 	%%Turn > 8,
 	%% after all the pieces in the board
 	read_coords(X1,Y1, 0, 4), %%choose coords where a piece is
@@ -367,6 +464,53 @@ human_play(Game, GameOut):-
 	format("~s",["4..."]), nl,
 	nextTurn([BoardOut,Player, Cels,Turn, pvp] ,GameOut), !
        ).
+
+%%%%%%%%%%%%%%%%%%%%%%%% human vs bot random %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%since its a small board there is not a big impact at doing this
+random_find(Board,Color,Y, X):-
+    repeat,
+    random(0, 4, Y),
+    nth0(Y, Board, Col),
+    random(0,4 ,X),
+    nth0(X, Col, Color).
+
+
+
+bot_play(GameIn, GameOut):-
+	getGameBoard(GameIn, Board),
+	getGamePlayer(GameIn, Player),
+	getGameTypeCels(GameIn, Cels),
+	getGameTurn(GameIn, Turn),
+	printGameStatus(Turn),
+	printBoard(Board,Cels),	
+	currentPlayerStatus(Player,Board),
+	pressEnter,nl ,
+	repeat,
+	(
+	Turn =< 8,
+	random(0, 4, Row), random(0, 4, Col),
+	checkEmpty(Board, Row, Col), %% should be empty
+	format("checked empty",[]),nl,
+	Player = player(_,Color), %% bot is a player
+	set_matrix_element_pos(Board, BoardOut, Color, Col, Row),
+	format("set matrix",[]),nl,
+	nextTurn([BoardOut, Player, Cels, Turn, bvb], GameOut), nl ,!;
+	Turn > 8,
+	Player = player(_,Color), %% bot is a player
+	format("b1",[]),
+	random_find(Board, Color, Row, Col), %%choose random position
+	format("b2",[]),
+	%% function to calculate random adjacent free cel TODO
+	format("b3",[]),
+	move_piece(Col, DestCol, Row, DestRow, Board, BoardOut),
+	format("b4",[]),
+	nextTurn([BoardOut,Player, Cels,Turn, bvb] ,GameOut)
+	).
+	
+
+
+	
 	
 	
 	
@@ -378,15 +522,24 @@ game :-
 
 game_loop(Game):-
 	getGamePlayer(Game,Player),
-	getGameBoard(Game,Board),
-	\+ win(Board,Player),
-	(	
 	getGameMode(Game,Mode),
-	%% cut needed bc there will be other options
-	Mode == pvp, human_play(Game,GameOut), game_loop(GameOut), ! 
+	(	
+	Mode == pvp, human_play(Game,GameOut),getGameBoard(GameOut,NewBoard),
+	\+win(NewBoard,Player), game_loop(GameOut), !;
+
+	Mode == pvb, 
+	getGameBoard(GameOut,NewBoard),	
+	human_play(Game,GameOut),\+win(NewBoard,Player),
+	bot_play(GameOut, GameOut2),\+win(NewBoard,Player),game_loop(GameOut2), ! ;
 	
+	Mode == bvb, bot_play(Game,GameOut),getGameBoard(GameOut,NewBoard),
+	\+win(NewBoard,Player), game_loop(GameOut), !
 	).
-game_loop(_):-format("Someone Won",[]), nl, main_menu.
+
+
+game_loop(Game):- getGamePlayer(Game,player(_,Piece)),
+		  format("Player ~s won!",[Piece]), nl, 
+	          main_menu. %% back to the main menu
 		
 	
 	
