@@ -136,17 +136,13 @@ checkEmpty(Board, Row, Col):-
 
 %%just to test cal3- check if is a valid movement
 
-call3:-initalizePvsP(Game), 
-       isAdjacent(Game, 3, 3, 2, 3).
+call3(List) :-
+	initializePvsP(Game), 
+    valid_moves(Game,List).
 
 min(X,Y,Ans):-(
     X < Y ->  Ans is X;
     Ans is Y).
-
-checkOutOfBounds(Board, RowDest, ColDest):-
-	RowDest >= 0, ColDest >= 0,
-	getListSize(Board, Size),
-	RowDest < Size, ColDest < Size.
 
 getSlope(SrcRow, DestRow, SrcCol, DestCol, Slope):-
 	Delta_X is SrcRow-DestRow,
@@ -159,21 +155,21 @@ getTypePiece(Slope, Answer):- (
 		).
 
 checkIfSamePoint(SrcRow, DestRow, SrcCol, DestCol):-
-	SrcRow =:= DestRow , SrcCol =:= DestCol, !.
+	DestRow is SrcRow  , DestCol is SrcCol , !.
 
-checkIfSamePoint(_, _, _, _):-
-	format("Not a valid input: Src and Dest coords should be different",[]), nl,
-	pressEnter, nl,
-	fail.
-
-isAdjacent(Game,SrcRow, DestRow, SrcCol, DestCol):-
+%%%%%%%%%%%%%% Move %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+isAdjacent(Game,move(SrcRow, DestRow, SrcCol, DestCol)):-
+	%% instanciar src row e col
 	getGameBoard(Game, Board),
-	checkOutOfBounds(Board, DestRow, DestCol),
+	getGamePlayer(Game, Player),
+	Player = player(_, Color),
+	insideBoard(Board, SrcRow, SrcCol, Color),
+	\+ checkIfSamePoint(SrcRow, DestRow, SrcCol, DestCol),
 	Delta_X is abs(SrcRow-DestRow),
 	Delta_Y is abs(SrcCol- DestCol),
 	Delta_X < 2, Delta_Y < 2,
-	(Delta_X =:= 0-> true, !;
-	 Delta_Y =:= 0 -> true, !;
+	(Delta_X is 0-> true, !;
+	 Delta_Y is 0 -> true, !;
 	 getSlope(SrcRow, DestRow, SrcCol, DestCol,Slope),
 	 getTypePiece(Slope,Piece),
 	 min(SrcRow,DestRow, MinRow),
@@ -183,6 +179,17 @@ isAdjacent(Game,SrcRow, DestRow, SrcCol, DestCol):-
 	 getPiece(Cels,MiniR,MiniC,PieceGot),
 	 PieceGot = Piece -> true, write("baduh!"), !
 	).
+
+
+move(Move, Game, BoardOut) :-
+	getGameBoard(Game,Board),
+	isAdjacent(Game,Move),
+	move_piece(Move, Game, BoardOut).
+
+valid_moves(Game, ListOfMoves) :-
+	findall(Move, move(Move,Game,BoardOut), ListOfMoves).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 isAdjacent(_,_,_,_,_):-
 	format("You mande a invalid move",[]), nl,
@@ -212,7 +219,7 @@ get_pos(Board, X, Y, Element):-
 
 
 %% faz swap do conteudo do tabuleiro
-move_piece(SrcRow, DestRow, SrcCol, DestCol, BoardIn, BoardOut):-
+move_piece(move(SrcRow, DestRow, SrcCol, DestCol), BoardIn, BoardOut):-
 	get_pos(BoardIn,SrcRow, SrcCol, Piece), %% retrieves the piece,
 	format("~p",[Piece]), nl,
 	set_matrix_element_pos(BoardIn, Bout, empty, SrcRow, SrcCol),
@@ -455,8 +462,7 @@ human_play(Game, GameOut):-
 	read_coords(X1,Y1, 0, 4), %%choose coords where a piece is
 	check_cel(Board, X1, Y1, Player),
 	format("~s",["1..."]), nl,
-	read_coords(X2, Y2, 0, 4), %% where should this be moved
-	\+ checkIfSamePoint(Y1, Y2, X1, X2),
+	read_coords(X2, Y2, 0, 4), %% where should this be move
 	format("~s",["2..."]), nl,
 	isAdjacent(Game,Y1, Y2, X1, X2),
 	format("~s",["3..."]), nl,

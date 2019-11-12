@@ -1,3 +1,5 @@
+:- use_module(library(between)).
+
 :-include('util.pl').
 :-include('list.pl').
 
@@ -122,6 +124,10 @@ currentPlayerStatus(player(PlayerNr,TypePieces),Board):-
 	getNrPieces(Board,TypePieces, NumberPieces),
         nl,
         format("Player ~d(~s): ~d/4 pieces in the board",[PlayerNr,TypePieces,NumberPieces]).
+
+insideBoard(Board, X, Y, Element) :-
+    nth0(Y, Board, Line ),
+    nth0(X, Line, Element).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
