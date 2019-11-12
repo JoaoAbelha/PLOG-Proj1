@@ -42,8 +42,6 @@ set_matrix_element_pos([RowIn|RestIn], [RowIn|RestOut], Element, X, Y):-
 	set_matrix_element_pos(RestIn,RestOut, Element, X, Yf).
 	
 
-
-	
-	
-
-
+get_element(Board, Element, X, Y) :-
+	nth0(Y, Board, _BoardRow),
+    nth0(X, _BoardRow, Element).

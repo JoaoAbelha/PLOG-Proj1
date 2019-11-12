@@ -125,10 +125,11 @@ currentPlayerStatus(player(PlayerNr,TypePieces),Board):-
         nl,
         format("Player ~d(~s): ~d/4 pieces in the board",[PlayerNr,TypePieces,NumberPieces]).
 
-insideBoard(Board, X, Y, Element) :-
-    nth0(Y, Board, Line ),
-    nth0(X, Line, Element).
+insideBoard([HeadOfTheBoard | TailOfTheBoard], X, Y) :-
+    length(HeadOfTheBoard, BoardLengthY),
+    BoardLenY is BoardLengthY - 1,
+    between(0, BoardLenY, Y),
+    length(TailOfTheBoard, BoardLenX),
+    between(0, BoardLenX, X).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-

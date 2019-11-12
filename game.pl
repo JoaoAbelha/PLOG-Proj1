@@ -138,125 +138,61 @@ checkEmpty(Board, Row, Col):-
 
 call3(List) :-
 	initializePvsP(Game), 
-    	valid_moves(Game,List).
+    valid_moves(Game,List).
 
-min(X,Y,Ans):-(
-    X < Y ->  Ans is X;
-    Ans is Y).
+check_same_point(move(SrcCol, DestCol, SrcRow, DestRow)) :-
+	DestRow is SrcRow, 
+	DestCol is SrcCol.
 
-getSlope(SrcRow, DestRow, SrcCol, DestCol, Slope):-
-	Delta_X is SrcRow-DestRow,
-	Delta_Y is SrcCol- DestCol,
-	Slope is Delta_Y/Delta_X.
-
-getTypePiece(Slope, Answer):- (
-		Slope =:= -1 -> Answer = up ;
-		Slope =:= 1 -> Answer = down
-		).
-
-checkIfSamePoint(SrcRow, DestRow, SrcCol, DestCol):-
-	DestRow is SrcRow  , DestCol is SrcCol , !.
-
-%%%%%%%%%%%%%% Move %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-isAdjacent(Game,move(SrcRow, DestRow, SrcCol, DestCol)):-
-	%% instanciar src row e col
-	getGameBoard(Game, Board),
-	getGamePlayer(Game, Player),
-	Player = player(_, Color),
-	insideBoard(Board, SrcRow, SrcCol, Color).
-	%%\+ checkIfSamePoint(SrcRow, DestRow, SrcCol, DestCol),
-	Delta_X is abs(SrcRow-DestRow),
-	Delta_Y is abs(SrcCol- DestCol),
-	Delta_X < 2, Delta_Y < 2,
-	(Delta_X is 0-> true, !;
-	 Delta_Y is 0 -> true, !;
-	 getSlope(SrcRow, DestRow, SrcCol, DestCol,Slope),
-	 getTypePiece(Slope,Piece),
-	 min(SrcRow,DestRow, MinRow),
-	 min(SrcCol,DestCol,MinCol),
-	 getGameTypeCels(Game,Cels),
-         MiniR is MinRow- 1, MiniC is MinCol-1,
-	 getPiece(Cels,MiniR,MiniC,PieceGot),
-	 PieceGot = Piece -> true, write("baduh!"), !
-	).
-
-
-podeMover(L,C1,L,C2, Max):-
-	C2 is C1 + 1,
-	C2 < Max.
-
-podeMover(L1,C,L2,C, Max):-
-	L2 is L1 + 1,
-	L2 < Max.
-
-
-
-%%%
-%%% Falta ver o calculo a fazer para dado duas posicoes vejam se ha diagonal entre elas
-
-
-podeMoverDiag(L1, C1, L2, C2, Cels, _, Max):-
-	L2 is L1 + 1,
-	C2 is C1 + 1,
-	L2 < Max,
-	C2 < Max,
-	Row is L1 - 1,
-	Col is C1 - 1,
-	getPiece(Cels, Row, Col, PieceGot),
-	PieceGot == up.
-
-podeMoverDiag(L1, C1, L2, C2, Cels, Min, _):-
-	L2 is L1 - 1,
-	C2 is C1 - 1,
-	L2 >= Min,
-	C2 >= Min,
-	getPiece(Cels, L1, C1, PieceGot),
-	format("~p",[PieceGot]),
-	PieceGot == up.
-
-podeMoverDiag(L1, C1, L2, C2, Cels, Min, Max):-
-	L2 is L1 + 1,
-	C2 is C1 - 1,
-	L2 < Max,
-	C2 >= Min,
-	Row is L1 - 1,
-	Col is C1 - 1,
-	getPiece(Cels, Row, Col, PieceGot),
-	PieceGot == up.
-
-podeMoverDiag(L1, C1, L2, C2, Cels, Min, Max):-
-	L2 is L1 - 1,
-	C2 is C1 + 1,
-	C2 < Max,
-	L2 >= Min,
-	Row is L1 - 1,
-	Col is C1 - 1,
-	getPiece(Cels, Row, Col, PieceGot),
-	PieceGot == up.
-	
-
-getAdjacent(Game,move(SrcRow, DestRow, SrcCol, DestCol)):-
+%%%%%%%%%%%%%% Move %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+valid_move(Game, move(SrcCol, DestCol, SrcRow, DestRow)) :-
 	getGameBoard(Game, Board),
 	getGamePlayer(Game, Player),
 	getGameTypeCels(Game, Cels),
-	Player = player(_, Color),
-	insideBoard(Board, SrcRow, SrcCol, Color), %% get src
-	(
-	%% linhas retas
-	%%podeMover(SrcRow, SrcCol, DestRow, DestCol, 5);
-	%% ou diagonais
-	podeMoverDiag(SrcRow, SrcCol, DestRow, DestCol, Cels, 0 ,5)
-	).
+	Player = player(_, Piece),
+	insideBoard(Board, SrcCol, SrcRow),
+	insideBoard(Board, DestCol, DestRow),
+	get_element(Board, Piece, SrcCol, SrcRow),
+	get_element(Board, empty, DestCol, DestRow),
+	is_adjacent(move(SrcCol, DestCol, SrcRow, DestRow), Cels).
 
-	
+is_adjacent(move(SrcCol, DestCol, SrcRow, DestRow), Cels) :-
+	is_diagonal(move(SrcCol, DestCol, SrcRow, DestRow)), !,
+	get_slope(move(SrcCol, DestCol, SrcRow, DestRow), Slope),
+	get_cel_type(Slope, Piece),
+	check_cel(move(SrcCol, DestCol, SrcRow, DestRow), Cels, Piece).
+
+is_adjacent(move(SrcCol, DestCol, SrcRow, DestRow), _) :-
+	Delta_X is abs(SrcCol - DestCol),
+	Delta_Y is abs(SrcRow - DestRow),
+	Delta_X < 2, Delta_Y < 2.
+
+is_diagonal(move(SrcCol, DestCol, SrcRow, DestRow)) :-
+	AbsDif_X is abs(DestCol - SrcCol),
+    AbsDif_Y is abs(DestRow - SrcRow),
+    AbsDif_X =:= AbsDif_Y.
+
+get_slope(move(SrcCol, DestCol, SrcRow, DestRow), Slope):-
+	Delta_X is SrcRow - DestRow,
+	Delta_Y is SrcCol - DestCol,
+	Delta_X < 2, Delta_Y < 2,
+	Slope is Delta_Y/Delta_X.
+
+get_cel_type(-1, up).
+get_cel_type(1, down).
+
+check_cel(move(SrcCol, DestCol, SrcRow, DestRow), Cels, Piece) :-
+    MinRow is min(SrcRow, DestRow), 
+	MinCol is min(SrcCol, DestCol),
+	getPiece(Cels, MinRow, MinCol, PieceGot),
+	PieceGot = Piece.
 	
 move(Move, Game, BoardOut) :-
-	getGameBoard(Game,Board),
-	getAdjacent(Game,Move).
-	%%move_piece(Move, Board, BoardOut).
+	valid_move(Game, Move).
+	move_piece(Move, Board, BoardOut).
 
 valid_moves(Game, ListOfMoves) :-
-	findall(Move, move(Move,Game,BoardOut), ListOfMoves).
+	findall(Move, move(Move, Game, _), ListOfMoves).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -268,17 +204,13 @@ isAdjacent(_,_,_,_,_):-
 	
 	
 
-check_cel(Board,X,Y, player(_,Value)):-
-	X1 is X + 1,
-	Y1 is Y + 1,
-	nth1(Y1,Board, Row),
-	nth1(X1, Row, Value).
+check_cel(Board, X, Y, player(_,Value)):-
+	nth0(Y,Board, Row),
+	nth0(X, Row, Value).
 
 check_cel_empty(Board,X,Y):-
-	X1 is X + 1,
-	Y1 is Y + 1,
-	nth1(Y1,Board, Row),
-	nth1(X1, Row, empty).
+	nth0(Y,Board, Row),
+	nth0(X, Row, empty).
 
 get_pos(Board, X, Y, Element):-
 	nth0(Y,Board, Row),
