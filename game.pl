@@ -138,7 +138,7 @@ checkEmpty(Board, Row, Col):-
 
 call3(List) :-
 	initializePvsP(Game), 
-    valid_moves(Game,List).
+    	valid_moves(Game,List).
 
 min(X,Y,Ans):-(
     X < Y ->  Ans is X;
@@ -163,8 +163,8 @@ isAdjacent(Game,move(SrcRow, DestRow, SrcCol, DestCol)):-
 	getGameBoard(Game, Board),
 	getGamePlayer(Game, Player),
 	Player = player(_, Color),
-	insideBoard(Board, SrcRow, SrcCol, Color),
-	\+ checkIfSamePoint(SrcRow, DestRow, SrcCol, DestCol),
+	insideBoard(Board, SrcRow, SrcCol, Color).
+	%%\+ checkIfSamePoint(SrcRow, DestRow, SrcCol, DestCol),
 	Delta_X is abs(SrcRow-DestRow),
 	Delta_Y is abs(SrcCol- DestCol),
 	Delta_X < 2, Delta_Y < 2,
@@ -181,10 +181,79 @@ isAdjacent(Game,move(SrcRow, DestRow, SrcCol, DestCol)):-
 	).
 
 
+podeMover(L,C1,L,C2, Max):-
+	C2 is C1 + 1,
+	C2 < Max.
+
+podeMover(L1,C,L2,C, Max):-
+	L2 is L1 + 1,
+	L2 < Max.
+
+
+
+%%%
+%%% Falta ver o calculo a fazer para dado duas posicoes vejam se ha diagonal entre elas
+
+
+podeMoverDiag(L1, C1, L2, C2, Cels, _, Max):-
+	L2 is L1 + 1,
+	C2 is C1 + 1,
+	L2 < Max,
+	C2 < Max,
+	Row is L1 - 1,
+	Col is C1 - 1,
+	getPiece(Cels, Row, Col, PieceGot),
+	PieceGot == up.
+
+podeMoverDiag(L1, C1, L2, C2, Cels, Min, _):-
+	L2 is L1 - 1,
+	C2 is C1 - 1,
+	L2 >= Min,
+	C2 >= Min,
+	getPiece(Cels, L1, C1, PieceGot),
+	format("~p",[PieceGot]),
+	PieceGot == up.
+
+podeMoverDiag(L1, C1, L2, C2, Cels, Min, Max):-
+	L2 is L1 + 1,
+	C2 is C1 - 1,
+	L2 < Max,
+	C2 >= Min,
+	Row is L1 - 1,
+	Col is C1 - 1,
+	getPiece(Cels, Row, Col, PieceGot),
+	PieceGot == up.
+
+podeMoverDiag(L1, C1, L2, C2, Cels, Min, Max):-
+	L2 is L1 - 1,
+	C2 is C1 + 1,
+	C2 < Max,
+	L2 >= Min,
+	Row is L1 - 1,
+	Col is C1 - 1,
+	getPiece(Cels, Row, Col, PieceGot),
+	PieceGot == up.
+	
+
+getAdjacent(Game,move(SrcRow, DestRow, SrcCol, DestCol)):-
+	getGameBoard(Game, Board),
+	getGamePlayer(Game, Player),
+	getGameTypeCels(Game, Cels),
+	Player = player(_, Color),
+	insideBoard(Board, SrcRow, SrcCol, Color), %% get src
+	(
+	%% linhas retas
+	%%podeMover(SrcRow, SrcCol, DestRow, DestCol, 5);
+	%% ou diagonais
+	podeMoverDiag(SrcRow, SrcCol, DestRow, DestCol, Cels, 0 ,5)
+	).
+
+	
+	
 move(Move, Game, BoardOut) :-
 	getGameBoard(Game,Board),
-	isAdjacent(Game,Move),
-	move_piece(Move, Game, BoardOut).
+	getAdjacent(Game,Move).
+	%%move_piece(Move, Board, BoardOut).
 
 valid_moves(Game, ListOfMoves) :-
 	findall(Move, move(Move,Game,BoardOut), ListOfMoves).
@@ -212,16 +281,13 @@ check_cel_empty(Board,X,Y):-
 	nth1(X1, Row, empty).
 
 get_pos(Board, X, Y, Element):-
-	X1 is X + 1,
-	Y1 is Y + 1,
-	nth1(Y1,Board, Row),
-	nth1(X1, Row, Element).
+	nth0(Y,Board, Row),
+	nth0(X, Row, Element).
 
 
 %% faz swap do conteudo do tabuleiro
 move_piece(move(SrcRow, DestRow, SrcCol, DestCol), BoardIn, BoardOut):-
 	get_pos(BoardIn,SrcRow, SrcCol, Piece), %% retrieves the piece,
-	format("~p",[Piece]), nl,
 	set_matrix_element_pos(BoardIn, Bout, empty, SrcRow, SrcCol),
 	set_matrix_element_pos(Bout, BoardOut, Piece, DestRow, DestCol).
 	
