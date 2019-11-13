@@ -78,6 +78,13 @@ get_list_value(List,Piece,Value) :-
 		Value is 2
 	).
 
-diagonals(Matrix, [L1, L2], N) :-
-    findall(B, (between(1,N, I), nth1(I, Matrix, Row), nth1(I, Row, B)), L1),
-    findall(B, (between(1,N,I), J is N+1-I, nth1(I, Matrix, Row), nth1(J,Row,B)),L2).
+get_list_value(_,_,0).
+
+columns([[]|_], []).
+columns(Matrix, [Column|Rest]) :-
+	column(Matrix, Column, Opa),
+	columns(Opa, Rest).
+
+column([], [], []).
+column([[S|Opitas]|Resto], [S|Columna], [Opitas|Filas]) :-
+  column(Resto, Columna, Filas).

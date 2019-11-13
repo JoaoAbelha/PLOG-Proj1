@@ -1,3 +1,15 @@
+evaluate_rows([],_,_).
+evaluate_rows([Head|Rest],player(_,Piece),Value) :-
+    encode(Head, Values),
+    get_list_value(Values,Piece,V),
+    Value is Value + V.
+
+evaluate_columns([],_,_).
+evaluate_columns([Head|Rest], player(_,Piece), Value) :-
+    encode(Head, Values),
+    get_list_value(Values, Piece, V),
+    Value is Value + V.
+
 value(Board, Player, 100) :- win(Board, Player).
 
 value(Board, Player, -100) :- 
@@ -5,6 +17,11 @@ value(Board, Player, -100) :-
     win(Board, NextPlayer).
 
 value(Board, Player, Value) :-
+    V1 is 0, V2 is 0,
+    evaluate_rows(Board,Player,V1),
+    columns(Board, Columns),
+    evaluate_columns(Columns,Player, V2),
+    Value is V1 + V2.
 
 alpha_beta(Player,0,Board,_Alpha,_Beta,_NoMove,Value) :- 
     value(Board,Player, Value).
