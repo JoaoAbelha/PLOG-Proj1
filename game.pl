@@ -152,12 +152,16 @@ valid_move(Game, move(SrcCol, DestCol, SrcRow, DestRow)) :-
 	Player = player(_, Piece),
 	insideBoard(Board, SrcCol, SrcRow),
 	insideBoard(Board, DestCol, DestRow),
-	get_element(Board, Piece, SrcCol, SrcRow),
 	get_element(Board, empty, DestCol, DestRow),
-	is_adjacent(move(SrcCol, DestCol, SrcRow, DestRow), Cels).
+	get_element(Board, Piece, SrcCol, SrcRow),
+	is_adjacent(move(SrcCol, DestCol, SrcRow, DestRow), Cels),
+	format("Src - (~d,~d), Dest - (~d,~d)",[SrcCol,SrcRow,DestCol,DestRow]), nl.
 
 is_adjacent(move(SrcCol, DestCol, SrcRow, DestRow), Cels) :-
 	is_diagonal(move(SrcCol, DestCol, SrcRow, DestRow)), !,
+	Delta_X is abs(SrcCol - DestCol),
+	Delta_Y is abs(SrcRow - DestRow),
+	Delta_X < 2, Delta_Y < 2,
 	get_slope(move(SrcCol, DestCol, SrcRow, DestRow), Slope),
 	get_cel_type(Slope, Piece),
 	check_cel(move(SrcCol, DestCol, SrcRow, DestRow), Cels, Piece).
@@ -173,13 +177,12 @@ is_diagonal(move(SrcCol, DestCol, SrcRow, DestRow)) :-
     AbsDif_X =:= AbsDif_Y.
 
 get_slope(move(SrcCol, DestCol, SrcRow, DestRow), Slope):-
-	Delta_X is SrcRow - DestRow,
-	Delta_Y is SrcCol - DestCol,
-	Delta_X < 2, Delta_Y < 2,
-	Slope is Delta_Y/Delta_X.
+	Delta_X is SrcCol - DestCol,
+	Delta_Y is SrcRow - DestRow,
+	Slope is Delta_X/Delta_Y.
 
-get_cel_type(-1, up).
-get_cel_type(1, down).
+get_cel_type(-1.0, up).
+get_cel_type(1.0, down).
 
 check_cel(move(SrcCol, DestCol, SrcRow, DestRow), Cels, Piece) :-
     MinRow is min(SrcRow, DestRow), 
@@ -187,12 +190,13 @@ check_cel(move(SrcCol, DestCol, SrcRow, DestRow), Cels, Piece) :-
 	getPiece(Cels, MinRow, MinCol, PieceGot),
 	PieceGot = Piece.
 	
-move(Move, Game, BoardOut) :-
-	valid_move(Game, Move).
-	move_piece(Move, Board, BoardOut).
+move(move(SrcCol, DestCol, SrcRow, DestRow), Game) :-
+	%%getGameBoard(Game, Board),
+	valid_move(Game, move(SrcCol, DestCol, SrcRow, DestRow)).
+	%%move_piece(Move, Board, BoardOut).
 
 valid_moves(Game, ListOfMoves) :-
-	findall(Move, move(Move, Game, _), ListOfMoves).
+	findall(Move, move(Move, Game), ListOfMoves).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
