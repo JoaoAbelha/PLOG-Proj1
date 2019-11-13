@@ -34,8 +34,8 @@ getAllDiagonals([RowStart|Rest], Resultante, Tamanho, RowAtual, InLine):-
     findall(Y,getDiagonal_Down([RowStart|Rest],Y),Result2),
     getAllDiagonals(Rest,RestResult,Tamanho, New, InLine),
    	append(Result1,Result2,Result3),
-    append(Result3,RestResult,Resultant),
-    sort(Resultant,Resultante).
+    append(Result3,RestResult,Resultant).
+
 
 getAllDiagonals([_|Rest], RestResult,Tamanho, RowAtual, InLine):-
     	RowFinal is RowAtual + InLine,
@@ -45,9 +45,10 @@ getAllDiagonals([_|Rest], RestResult,Tamanho, RowAtual, InLine):-
 
 getAllDiagonals(_,[],_,_,_).
 
-call4(R):-
+call4(Res):-
     board(B),
-    getAllDiagonals(B,R,5,0,4), !.
+    getAllDiagonals(B,R,5,0,4), !,
+    sort(R,Res).
 
 call5(X):-
     board(B),
