@@ -282,6 +282,26 @@ diagonal_down([Row1, Row2, Row3, Row4|Rest], Color):-
          nth1(Index4,Row4,Color), ! ;
          diagonal_down([Row2, Row3, Row4|Rest], Color)
        ).
+
+
+getDiagonal([Row1, Row2, Row3, Row4|Rest], [[Color1,Color2,Color3,Color4]|List]):-
+       ( nth0(Index1,Row1,Color1),
+    	 Index2 is Index1 + 1,
+    	 nth0(Index2,Row2,Color2),
+    	 Index3 is Index2 + 1,
+    	 nth0(Index3,Row3,Color3),
+    	 Index4 is Index3 + 1,
+         nth0(Index4,Row4, Color4);
+         diagonal_up([Row2, Row3, Row4|Rest], List)
+       ).
+
+getDiagonal(_,[]).
+
+call4(Result):-
+	initializePvsP(Game),
+	getGameBoard(Board, Game),
+	findall(X, getDiagonal(Board, X	), Result).
+	
     	
 
 %%still check: only can win after the fourth play (just performance enhancement)

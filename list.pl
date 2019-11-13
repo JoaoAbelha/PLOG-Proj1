@@ -1,3 +1,6 @@
+isEmpty([]).
+
+
 %%calculate the size of the list using accumulators
 getListSize(List, Size):-
 	listSize(List, 0, Size).
