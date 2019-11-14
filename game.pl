@@ -154,11 +154,10 @@ valid_move(Game, move(SrcCol, DestCol, SrcRow, DestRow)) :-
 	insideBoard(Board, DestCol, DestRow),
 	get_element(Board, empty, DestCol, DestRow),
 	get_element(Board, Piece, SrcCol, SrcRow),
-	is_adjacent(move(SrcCol, DestCol, SrcRow, DestRow), Cels),
-	format("Src - (~d,~d), Dest - (~d,~d)",[SrcCol,SrcRow,DestCol,DestRow]), nl.
+	is_adjacent(move(SrcCol, DestCol, SrcRow, DestRow), Cels).
 
 is_adjacent(move(SrcCol, DestCol, SrcRow, DestRow), Cels) :-
-	is_diagonal(move(SrcCol, DestCol, SrcRow, DestRow)), !,
+	is_diagonal(move(SrcCol, DestCol, SrcRow, DestRow)),
 	Delta_X is abs(SrcCol - DestCol),
 	Delta_Y is abs(SrcRow - DestRow),
 	Delta_X < 2, Delta_Y < 2,
@@ -192,8 +191,9 @@ check_cel(move(SrcCol, DestCol, SrcRow, DestRow), Cels, Piece) :-
 	
 move(move(SrcCol, DestCol, SrcRow, DestRow), Game, BoardOut) :-
 	getGameBoard(Game, Board),
-	valid_move(Game, move(SrcCol, DestCol, SrcRow, DestRow)).
-	move_piece(Move, Board, BoardOut).
+	getGamePlayer(Game, player(_,Piece)),
+	valid_move(Game, move(SrcCol, DestCol, SrcRow, DestRow)),
+	move_piece(move(SrcCol, DestCol, SrcRow, DestRow), Piece, Board, BoardOut).
 
 valid_moves(Game, ListOfMoves) :-
 	findall((Move,BoardOut), move(Move, Game, BoardOut), ListOfMoves).
@@ -205,8 +205,6 @@ isAdjacent(_,_,_,_,_):-
 	format("You can only move a piece to an adjacent vertex of the board!",[]), nl,
 	format("Please try again, having that in consideration",[]), nl,
 	pressEnter, nl, fail.
-	
-	
 
 check_cel(Board, X, Y, player(_,Value)):-
 	nth0(Y,Board, Row),
@@ -216,16 +214,10 @@ check_cel_empty(Board,X,Y):-
 	nth0(Y,Board, Row),
 	nth0(X, Row, empty).
 
-get_pos(Board, X, Y, Element):-
-	nth0(Y,Board, Row),
-	nth0(X, Row, Element).
-
 
 %% faz swap do conteudo do tabuleiro
-move_piece(move(SrcRow, DestRow, SrcCol, DestCol), BoardIn, BoardOut):-
-	get_pos(BoardIn,SrcRow, SrcCol, Piece), %% retrieves the piece,
-	set_matrix_element_pos(BoardIn, Bout, empty, SrcRow, SrcCol),
-	set_matrix_element_pos(Bout, BoardOut, Piece, DestRow, DestCol).
+move_piece(move(SrcCol, DestCol, SrcRow, DestRow), Piece, BoardIn, BoardOut):-
+	set_matrix_element_pos(BoardIn, BoardOut, Piece, DestRow, DestCol), !.
 	
 	
 
