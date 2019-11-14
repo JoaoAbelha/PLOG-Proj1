@@ -1,6 +1,6 @@
 :-include('board.pl').
 :-include('list.pl').
-:- use_module(library(lists)).
+:-use_module(library(lists)).
 :-use_module(library(random)).
 
 
@@ -190,13 +190,13 @@ check_cel(move(SrcCol, DestCol, SrcRow, DestRow), Cels, Piece) :-
 	getPiece(Cels, MinRow, MinCol, PieceGot),
 	PieceGot = Piece.
 	
-move(move(SrcCol, DestCol, SrcRow, DestRow), Game) :-
-	%%getGameBoard(Game, Board),
+move(move(SrcCol, DestCol, SrcRow, DestRow), Game, BoardOut) :-
+	getGameBoard(Game, Board),
 	valid_move(Game, move(SrcCol, DestCol, SrcRow, DestRow)).
-	%%move_piece(Move, Board, BoardOut).
+	move_piece(Move, Board, BoardOut).
 
 valid_moves(Game, ListOfMoves) :-
-	findall(Move, move(Move, Game), ListOfMoves).
+	findall((Move,BoardOut), move(Move, Game, BoardOut), ListOfMoves).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
