@@ -17,9 +17,9 @@ getNrElements(List,Element,Nr):-
 getNr_aux([],_,Nr,Nr).
 getNr_aux([Head|Tail], Head, Nr, Result):-
 	NrAtual is Nr + 1,
-	getNr_aux(Tail, Head, NrAtual, Result).
+	getNr_aux(Tail, Head, NrAtual, Result), !.
 getNr_aux([_|Tail], Ele, Nr, Result):-
-	getNr_aux(Tail, Ele, Nr, Result).
+	getNr_aux(Tail, Ele, Nr, Result), !.
 
 %%list of lists calculate the number of elements of this
 getBoardNrElements(Board, Number, Element):-

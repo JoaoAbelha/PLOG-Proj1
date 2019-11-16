@@ -1,7 +1,5 @@
 :- use_module(library(between)).
-
-:-include('util.pl').
-:-include('list.pl').
+:-ensure_loaded('list.pl').
 
 getPos(empty,' ').
 getPos(green,'G').
@@ -10,11 +8,6 @@ getPos(yellow,'Y').
 getCel(empty,' ').
 getCel(up,'/').
 getCel(down,'\\').
-
-firstPlayer(player(1,green)).
-secondPlayer(player(2,yellow)).
-
-
 
 emptyBoard([[empty,empty, empty, empty, empty],
         [empty,empty, empty, empty, empty],
@@ -45,8 +38,6 @@ finalStateBoard([[empty,empty, empty, empty, empty],
             [empty,empty, empty, yellow, empty],
             [empty,empty, empty, yellow, empty]
 ]).
-
-
 
 cels([[empty,up, down, empty],
     [up,up, down, down],
@@ -114,16 +105,15 @@ printBoard([HeadOfTheBoard | TailOfTheBoard],Cells) :-
     length(HeadOfTheBoard, NumberOfColumns),
     printColumnNumbers(NumberOfColumns),
     nl,
-    printBoardRest([HeadOfTheBoard | TailOfTheBoard], Cells, 0).
+    printBoardRest([HeadOfTheBoard | TailOfTheBoard], Cells, 0), !.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 getNrPieces(Board,TypePieces, NumberPieces):-
 	getBoardNrElements(Board,NumberPieces, TypePieces).
 
-currentPlayerStatus(player(PlayerNr,TypePieces),Board):-
-	getNrPieces(Board,TypePieces, NumberPieces),
-        nl,
-        format("Player ~d(~s): ~d/4 pieces in the board",[PlayerNr,TypePieces,NumberPieces]).
+currentPlayerStatus(player(Piece, _), Board):-
+	getNrPieces(Board, Piece, NumberPieces),
+    nl,
+    format("Player ~s: ~d/4 pieces in the board",[Piece,NumberPieces]), !.
 
 insideBoard([HeadOfTheBoard | TailOfTheBoard], X, Y) :-
     length(HeadOfTheBoard, BoardLengthY),
@@ -131,5 +121,3 @@ insideBoard([HeadOfTheBoard | TailOfTheBoard], X, Y) :-
     between(0, BoardLenY, Y),
     length(TailOfTheBoard, BoardLenX),
     between(0, BoardLenX, X).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
