@@ -61,29 +61,6 @@ encode(L1,L2) :- pack(L1,L), transform(L,L2).
 transform([],[]).
 transform([[X|Xs]|Ys],[X/N|Zs]) :- length([X|Xs],N), transform(Ys,Zs).
 
-get_list_value(List,Piece,Value) :-
-	(
-		append(_,[empty/N,Piece/M | _], List);
-		append(_,[Piece/M,empty/N | _], List);
-		append(_,[empty/N, Piece/M, empty/X | _], List)
-	),
-	(
-		(
-			3 < N+M;
-			nonvar(X), 3 < N+M+X
-		),
-		3 is M,
-		Value is 5;
-		(
-			3 < N+M;
-			nonvar(X), 3 < N+M+X
-		),
-		2 is M,
-		Value is 2
-	).
-
-get_list_value(_,_,0).
-
 get_columns([[]|_], []).
 get_columns(Matrix, [Column|Rest]) :-
 	column(Matrix, Column, Opa),

@@ -10,7 +10,7 @@ valid_move(Board, Cels, move(SrcCol, SrcRow, DestCol, DestRow), Piece) :-
 	get_element(Board, empty, DestCol, DestRow),
 	get_element(Board, Piece, SrcCol, SrcRow),
 	is_adjacent(move(SrcCol, SrcRow, DestCol, DestRow), Cels).
-
+	
 is_adjacent(move(SrcCol, SrcRow, DestCol, DestRow), Cels) :-
 	is_diagonal(move(SrcCol, SrcRow, DestCol, DestRow)), !,
 	Delta_X is abs(SrcCol - DestCol),
@@ -59,5 +59,5 @@ move(game_state(Board, _, _, _), Piece, Move, BoardOut) :- !,
 	valid_move(Board, Move),
 	move_piece(Move, Piece, Board, BoardOut).
 
-valid_moves(Game, player(Piece, _), ListOfMoves) :-
-	findall((Move,BoardOut), move(Game, Piece, Move, BoardOut), ListOfMoves).
+valid_moves(Game, Piece, ListOfMoves) :-
+	findall(Move-BoardOut, move(Game, Piece, Move, BoardOut), ListOfMoves).

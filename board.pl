@@ -110,7 +110,7 @@ printBoard([HeadOfTheBoard | TailOfTheBoard],Cells) :-
 getNrPieces(Board,TypePieces, NumberPieces):-
 	getBoardNrElements(Board,NumberPieces, TypePieces).
 
-currentPlayerStatus(player(Piece, _), Board):-
+currentPlayerStatus(Piece, Board):-
 	getNrPieces(Board, Piece, NumberPieces),
     nl,
     format("Player ~s: ~d/4 pieces in the board",[Piece,NumberPieces]), !.

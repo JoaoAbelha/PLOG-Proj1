@@ -1,6 +1,7 @@
 :- use_module(library(system)).
 :- ensure_loaded('player_chooser.pl').
 :- ensure_loaded('input.pl').
+:- ensure_loaded('bots.pl').
 
 initial_player(player(green, Type)) :-
     choose_player(Type).
@@ -39,3 +40,7 @@ get_move(Type, game_state(Board, Cels, _, _), Move, Piece, _, NTurns) :-
         findall(M, valid_move(Board, Cels, M, Piece), Moves), sleep(1),
         get_random_element(Moves, Move)
     ).
+
+get_move(Type, GameState, Move, CurrP, NextP, _) :-
+    is_smart_ai(Type), !,
+    alpha_beta(GameState, CurrP, NextP, 5, -300, 300, Move, _Value), write(Move), nl.
