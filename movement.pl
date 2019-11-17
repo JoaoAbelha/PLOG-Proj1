@@ -1,21 +1,24 @@
 :- ensure_loaded('board.pl').
 
-
+/*
+ get_cel_type(?Slope, ?Orientation).
+*/
 get_cel_type(-1.0, up).
 get_cel_type(1.0, down).
 
 /*
-  missing
-  
+  valid_move(+Board,+Move)
+  checks if a move is valid for turn <=8
 */
 valid_move(Board, move(Col, Row)) :-
 	insideBoard(Board, Col, Row),
 	get_element(Board, empty, Col, Row).
 
 
-/**
-missign
-/
+/*
+  valid_move(+Board, +Cels, -Move, +Piece)
+  retrieves a valid move for a piece of Color Piece for turn > 8
+*/
 valid_move(Board, Cels, move(SrcCol, SrcRow, DestCol, DestRow), Piece) :-
 	insideBoard(Board, SrcCol, SrcRow),
 	insideBoard(Board, DestCol, DestRow),
