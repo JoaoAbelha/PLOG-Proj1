@@ -121,3 +121,8 @@ insideBoard([HeadOfTheBoard | TailOfTheBoard], X, Y) :-
     between(0, BoardLenY, Y),
     length(TailOfTheBoard, BoardLenX),
     between(0, BoardLenX, X).
+
+board_size(Board, LinesSize, ColumnsSize) :-
+    Board = [HeadOfTheBoard | _],
+    length(Board, LinesSize),
+	length(HeadOfTheBoard, ColumnsSize).

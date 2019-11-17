@@ -94,7 +94,7 @@ play_game(game_state(Board, Cels, _, _), player(CurrP, _CurrType), player(NextP,
 	).
 
 play_game(GameState, player(CurrP, CurrType), player(NextP, NextType), NTurns) :-
-    get_move(CurrType, GameState, Move, CurrP, NextP, NTurns),
+    choose_move(CurrType, GameState, Move, CurrP, NextP, NTurns),
     move(GameState, CurrP, Move, BoardOut), !,
     NTurns2 is NTurns + 1,
 	nextTurn(GameState, NewGameState, BoardOut),

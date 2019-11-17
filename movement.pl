@@ -10,7 +10,7 @@ valid_move(Board, Cels, move(SrcCol, SrcRow, DestCol, DestRow), Piece) :-
 	get_element(Board, empty, DestCol, DestRow),
 	get_element(Board, Piece, SrcCol, SrcRow),
 	is_adjacent(move(SrcCol, SrcRow, DestCol, DestRow), Cels).
-	
+		
 is_adjacent(move(SrcCol, SrcRow, DestCol, DestRow), Cels) :-
 	is_diagonal(move(SrcCol, SrcRow, DestCol, DestRow)), !,
 	Delta_X is abs(SrcCol - DestCol),

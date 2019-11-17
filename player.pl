@@ -11,14 +11,15 @@ second_player(player(yellow, Type)) :-
 
 is_human(1).
 is_random_ai(2).
-is_smart_ai(3).
+is_greedy_ai(3).
+is_smart_ai(4).
 
 get_random_element(List, Element) :-
     length(List, _N),
     random(0, _N, RandN),
     nth0(RandN, List, Element), !.
 
-get_move(Type, _, Move, _, _, NTurns) :-
+choose_move(Type, _, Move, _, _, NTurns) :-
     is_human(Type), !,
     (
         NTurns =< 8,
@@ -30,17 +31,34 @@ get_move(Type, _, Move, _, _, NTurns) :-
         Move = move(SrcCol, SrcRow, DestCol, DestRow)
     ).
 
-get_move(Type, game_state(Board, Cels, _, _), Move, Piece, _, NTurns) :-
+choose_move(Type, game_state(Board, Cels, _, _), Move, Piece, _, NTurns) :-
     is_random_ai(Type), !,
     (
         NTurns =< 8,
-        findall(M, valid_move(Board, M), Moves), write(Moves), sleep(1),
+        findall(M, valid_move(Board, M), Moves), sleep(2.5),
         get_random_element(Moves, Move);
         NTurns > 8,
         findall(M, valid_move(Board, Cels, M, Piece), Moves), sleep(1),
         get_random_element(Moves, Move)
     ).
 
-get_move(Type, GameState, Move, CurrP, NextP, _) :-
-    is_smart_ai(Type), !,
-    alpha_beta(GameState, CurrP, NextP, 5, -300, 300, Move, _Value), write(Move), nl.
+choose_move(Type, game_state(Board, Cels, NFirst, NSecond), Move, CurrP, NextP, NTurns) :-
+    is_greedy_ai(Type), !, sleep(2),
+    (
+        NTurns =< 2,
+        findall(M, valid_move(Board, M), Moves),
+        get_random_element(Moves, Move);
+        NTurns > 2, 
+        valid_moves(game_state(Board, Cels, NFirst, NSecond), CurrP, List),  
+        greedy_move(List, CurrP, NextP, Move)
+    ).
+
+choose_move(Type, game_state(Board, Cels, NFirst, NSecond), Move, CurrP, NextP, NTurns) :-
+    is_smart_ai(Type), !, sleep(1),
+    (
+        NTurns =< 2,
+        findall(M, valid_move(Board, M), Moves),
+        get_random_element(Moves, Move);
+        NTurns > 2,
+        alpha_beta(game_state(Board, Cels, NFirst, NSecond), CurrP, NextP, 3, -1000, 1000, Move, _Value)
+    ).

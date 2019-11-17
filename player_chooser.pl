@@ -17,13 +17,15 @@ print_options :-
 	write('|                               |'), nl,
 	write('|   1. Human                    |'), nl,
 	write('|   2. Random                   |'), nl,
-	write('|   3. Smart                    |'), nl,
+	write('|   3. Greedy                   |'), nl,
+	write('|   4. Smart                    |'), nl,
 	write('|                               |'), nl,
 	write('================================='), nl.
 
 valid_difficulty(1).
 valid_difficulty(2).
 valid_difficulty(3).
+valid_difficulty(4).
 
 % Message to show when the option inserted is invalid
 print_wrong :-

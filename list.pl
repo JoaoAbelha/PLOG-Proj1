@@ -67,7 +67,7 @@ get_columns(Matrix, [Column|Rest]) :-
 	get_columns(Opa, Rest).
 
 column([], [], []).
-column([[S|ColumnRest]|Rest], [S|Column], [ColumnRest|RowsRest]) :-
+column([[S|ColumnRest]|Rest], [S|Column], [ColumnRest|RowsRest]) :- !,
 	column(Rest, Column, RowsRest).
 
 add_char(0,[]).
