@@ -3,12 +3,19 @@
 :- ensure_loaded('input.pl').
 :- ensure_loaded('bots.pl').
 
+/* initial_player(-Player)
+   chooses the first type of player
+*/
 initial_player(player(green, Type)) :-
     choose_player(Type).
 
+/* initial_player(-Player)
+   chooses the second type of player
+*/
 second_player(player(yellow, Type)) :-
     choose_player(Type).
 
+/*possible players*/
 is_human(1).
 is_random_ai(2).
 is_greedy_ai(3).

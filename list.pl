@@ -1,8 +1,18 @@
 :-use_module(library(lists)).
 
+/*implementation of our own library list specialized in lists of lists functionalities*/
+
+/*
+ isEmpty(+List)
+ check if a list is empty
+*/
 isEmpty([]).
 
-%%calculate the size of the list using accumulators
+
+/*
+  getListSize(+List,-Size) 
+  given a list it retrieves its size (using accumulators)
+*/
 getListSize(List, Size):-
 	listSize(List, 0, Size).
 listSize([],Size,Size).
@@ -10,7 +20,10 @@ listSize([_|Tail],Size, Result):-
 	NewSize is Size + 1,
 	listSize(Tail,NewSize,Result).
 
-%% calculate number of elements using accumulators
+/*
+  getNrElements(+List,+Element,-Number)
+  retrieves the number of elements of some type present in the list (using accumulators)
+*/
 getNrElements(List,Element,Nr):-
 	getNr_aux(List, Element, 0 , Nr).
 
@@ -21,7 +34,10 @@ getNr_aux([Head|Tail], Head, Nr, Result):-
 getNr_aux([_|Tail], Ele, Nr, Result):-
 	getNr_aux(Tail, Ele, Nr, Result), !.
 
-%%list of lists calculate the number of elements of this
+/*
+  getBoardNrElements(+Board,-Number,+Element)
+  retrieves the number of elements present in the board
+*/
 getBoardNrElements(Board, Number, Element):-
 	getBoardNr_aux(Board, Element, 0, Number).
 
@@ -31,12 +47,20 @@ getBoardNr_aux([List|Rest], Element, Number, Result):-
 	AtualCount is Number + GetNumber,
 	getBoardNr_aux(Rest, Element, AtualCount, Result).
 
+/*
+  set_list_element(+LineIn, -LineOut, +Element, +Number)
+  sets the index Number of LineIn with Element and retrieves LineOut 
+*/
 set_list_element([_|T],[Element|T],Element,0).
 set_list_element([Head|T1],[Head|List],Element,X):-
 	X > 0, !,
 	Xf is X - 1,
 	set_list_element(T1,List,Element,Xf).
 
+/*
+  set_matrix_element_pos(+BoardIn, -BoardOut, +Element, +X, +Y)
+  sets the matrix Element accordingly to X and Y
+*/
 set_matrix_element_pos([RowIn|RestIn],[RowOut|RestIn],Element,X,0):-
 	set_list_element(RowIn, RowOut, Element, X).
 
@@ -45,8 +69,12 @@ set_matrix_element_pos([RowIn|RestIn], [RowIn|RestOut], Element, X, Y):-
 	Yf is Y - 1,
 	set_matrix_element_pos(RestIn,RestOut, Element, X, Yf).
 
+/*
+  get_element(+Board, -Element, +X, +Y)
+  retrieves the matrix Element accordingly to X and Y
+*/
 get_element(Board, Element, X, Y) :- !,
-	nth0(Y, Board, BoardRow),
+    nth0(Y, Board, BoardRow),
     nth0(X, BoardRow, Element).
 
 pack([],[]).

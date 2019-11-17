@@ -1,3 +1,5 @@
+/*functions to read the user input*/
+
 pressEnter:-
 	get_char(_), !.
 

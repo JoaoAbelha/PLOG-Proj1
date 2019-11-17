@@ -4,12 +4,20 @@
 :- ensure_loaded('player.pl').
 :- ensure_loaded('game_over.pl').
 
+/*
+   inital_game_state(-InitialGameState)
+   Called to intialize the game state with its initial information
+*/
 initial_game_state(game_state(Board,Cels,NFirst,NSecond)) :-
 	emptyBoard(Board),
 	cels(Cels),
 	getNrPieces(Board, green, NFirst),
 	getNrPieces(Board, yellow, NSecond).
 
+/*
+   nextTurn(+GameState,-GameStateOut,-BoardOut)
+   Called to change turn by updating the game state: the board, the player turn 
+*/
 nextTurn(game_state(_, Cels, _, _), game_state(BoardOut, Cels, NFirst2, NSecond2), BoardOut) :-
 	getNrPieces(BoardOut, green, NFirst2),
 	getNrPieces(BoardOut, yellow, NSecond2).
@@ -42,8 +50,13 @@ print_credits :-
 	write('|   0 - Back                    |'), nl,
 	write('================================='), nl.
 
-%%%%%%%%%%%%%%%%%%%% * Menu handling-- eventualmente mudar os read * %%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%% * Menu handling-- * %%%%%%%%%%%%%%%%%%%%
 
+/*
+  main_menu
+    prints the main menu and waits for a valid option from the user to change
+    the menu state
+*/
 main_menu:-
 	print_menu,
 	catch(read(Option), _, fail),
@@ -57,6 +70,10 @@ choose_main_menu(Option):-
 	
 choose_main_menu(_):-  main_menu.
 
+/*
+  credits_menu
+  prints the credits menu
+*/
 credits_menu:-
 	print_credits,
 	catch(read(Option), _, fail),
@@ -66,6 +83,10 @@ credits_menu:-
 
 %%%%%%%%%%%%%%%%%%%%%% * Human Move * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+/*
+  start_game
+  * function to start the game before playing
+*/
 start_game :-
 	now(TS),
     setrand(TS),
@@ -75,30 +96,44 @@ start_game :-
 	second_player(P2),
 	play_game(Game, P1, P2, 1).
 
+/*
+  display_winner(+Piece)
+   function to display the winner
+*/
 display_winner(Piece) :- 
     write('Player '), write(Piece), write(' won!'), nl, fail.
 
+/*
+  display_invalid
+  function to display some basic rules if any invalid move is made
+*/
 display_invalid_move :-
 	format("You made a invalid move",[]), nl,
 	format("You can only move a piece to an adjacent vertex of the board!",[]), nl,
 	format("Please try again, having that in consideration",[]), nl,
 	pressEnter, pressEnter, nl.
 
+/*
+  play_game(+GameState, +Player1, +Player2, +TurnNumber)
+  modular function used to play the game between players (humans and bots)
+*/
 play_game(game_state(Board, Cels, _, _), player(CurrP, _CurrType), player(NextP, _NextType), NTurns) :-
-	printGameStatus(NTurns),
-	printBoard(Board,Cels),
+	printGameStatus(NTurns), %% shows the turn
+	printBoard(Board,Cels),  %% prints the board
 	currentPlayerStatus(CurrP, Board), nl,
-	(
-		game_over(Board, CurrP), !, display_winner(CurrP);
+	(       %% checks for a winner
+		game_over(Board, CurrP), !, display_winner(CurrP); 
 		game_over(Board, NextP), !, display_winner(NextP)	
 	).
 
 play_game(GameState, player(CurrP, CurrType), player(NextP, NextType), NTurns) :-
-    choose_move(CurrType, GameState, Move, CurrP, NextP, NTurns),
-    move(GameState, CurrP, Move, BoardOut), !,
+    choose_move(CurrType, GameState, Move, CurrP, NextP, NTurns), %% choose move to make
+    move(GameState, CurrP, Move, BoardOut), !, %% make a valid move
     NTurns2 is NTurns + 1,
-	nextTurn(GameState, NewGameState, BoardOut),
-    play_game(NewGameState, player(NextP, NextType), player(CurrP, CurrType), NTurns2).
+    nextTurn(GameState, NewGameState, BoardOut), %% change the turn
+    play_game(NewGameState, player(NextP, NextType), player(CurrP, CurrType), NTurns2). %% game loop
 
 play_game(GameState, CurrP, NextP, NTurns) :-
-    display_invalid_move, !, play_game(GameState, CurrP, NextP, NTurns).
+    display_invalid_move, !, play_game(GameState, CurrP, NextP, NTurns). %% invalid move was made
+
+

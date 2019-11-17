@@ -1,3 +1,8 @@
+
+/*
+  choose_player(+Type)
+  chooses the type of player
+*/
 choose_player(Type) :-
     print_options,
     catch(read(Type), _, fail),
@@ -22,6 +27,9 @@ print_options :-
 	write('|                               |'), nl,
 	write('================================='), nl.
 
+/*
+ valid_difficulty(+LevelOfDifficulty)
+*/
 valid_difficulty(1).
 valid_difficulty(2).
 valid_difficulty(3).
